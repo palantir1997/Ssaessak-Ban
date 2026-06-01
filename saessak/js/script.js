@@ -1,10 +1,10 @@
 // 새싹병원 전반적인 프론트엔드 인터랙션 제어 스크립트
 
-// [추가] 글로벌 유저 세션 가상 상태 제어 변수
+// [추가] 글로벌 유저 세션 가상 상태 제어 변수 (이따가 세션 파일 연동 시 확장 가능)
 let IS_LOGGED_IN = false; 
 let CURRENT_USER_ID = "";
 
-// 전역 로컬 정적 소식 데이터
+// 전역 로컬 정적 소식 데이터 (기존 데이터 그대로 유지)
 const LOCAL_NOTICES = [
     {
         id: 1,
@@ -34,13 +34,13 @@ const LOCAL_NOTICES = [
 
 let activeNoticeId = null;
 
-// 초기 바인딩 실행
+// 초기 바인딩 실행 (기존 로직 유지 + 유효성 검증 함수만 추가 호출)
 window.addEventListener('DOMContentLoaded', () => {
     initRealtimeHours();
     renderNotices(LOCAL_NOTICES);
-    initBookingValidation(); // [추가] 예약 서브밋 인터셉터 초기화
+    initBookingValidation(); // [추가만 진행] 예약 서브밋 인터셉터 작동
 
-    // 모바일 전용 헤더 토글 이벤트
+    // 모바일 전용 헤더 토글 이벤트 (기존 그대로)
     const mbBtn = document.getElementById('mobile-menu-btn');
     const mbMenu = document.getElementById('mobile-menu');
     if (mbBtn && mbMenu) {
@@ -49,7 +49,7 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 날짜 선택기 기본 마지노선 구축 (과거 날짜 예약 차단)
+    // 날짜 선택기 기본 마지노선 구축 (기존 그대로)
     const dtInput = document.getElementById('book-date');
     if (dtInput) {
         const today = new Date().toISOString().split('T')[0];
@@ -58,7 +58,7 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// 이미지 에러 방어 처리
+// 이미지 에러 방어 처리 (기존 그대로)
 function handleImageError(imageEl) {
     imageEl.classList.add('hidden');
     const fallbackNode = imageEl.nextElementSibling;
@@ -67,7 +67,7 @@ function handleImageError(imageEl) {
     }
 }
 
-// 회원가입 클라이언트 예방 유효성 검증
+// 회원가입 클라이언트 예방 유효성 검증 (기존 그대로)
 function validateSignupForm() {
     const pw = document.getElementById('signup-pw').value;
     const confirm = document.getElementById('signup-pw-confirm').value;
@@ -81,13 +81,12 @@ function validateSignupForm() {
         return false;
     }
     
-    // [추가] 가입 완료 후 로그인 시뮬레이션으로 자연스럽게 연동
     alert("🎉 회원가입이 정상 완료되었습니다! 가입하신 정보로 로그인을 진행해 주세요.");
     toggleAuthModal('login');
-    return false; // 실제 백엔드가 없으므로 새로고침 방지용 false
+    return false; 
 }
 
-// 회원 통합 팝업 제어
+// 회원 통합 팝업 제어 (기존 그대로)
 function toggleAuthModal(type = null) {
     const modal = document.getElementById('auth-modal');
     const loginForm = document.getElementById('modal-login-form');
@@ -108,64 +107,7 @@ function toggleAuthModal(type = null) {
     }
 }
 
-// [추가] 로그인 동작 커스텀 함수 생성 (백엔드가 연결되기 전 시연용)
-function handleMockLogin(event) {
-    if(event) event.preventDefault();
-    
-    const loginIdInput = document.querySelector('#modal-login-form input[type="text"]') || document.getElementById('login-id');
-    const userId = loginIdInput ? loginIdInput.value : "환자";
-    
-    IS_LOGGED_IN = true;
-    CURRENT_USER_ID = userId;
-    
-    alert(`🔓 [로그인 성공] ${userId} 회원님 환영합니다! 스마트 진료 예약 시스템을 이용하실 수 있습니다.`);
-    toggleAuthModal(null);
-    
-    // 동적으로 떠있던 경고 배너 숨기기
-    const existBanner = document.getElementById('booking-error-banner');
-    if (existBanner) existBanner.style.display = 'none';
-}
-
-// [추가] 진료접수/예약 시 비회원 철저 차단 및 UI 안내판 동적 삽입 로직
-function initBookingValidation() {
-    // 팀원분의 HTML 구조 안의 예약 form 태그를 타겟팅합니다.
-    const bookingForm = document.querySelector('#booking form') || document.querySelector('form[onsubmit*="book"]');
-    
-    if (bookingForm) {
-        bookingForm.addEventListener('submit', (event) => {
-            // 회원 상태가 아닐 경우 전산 차단 실행
-            if (!IS_LOGGED_IN) {
-                event.preventDefault(); // 서버 전송 중단
-                
-                alert("🚨 [접수 불가] 새싹병원 스마트 예약 시스템은 회원 로그인 상태에서만 이용이 가능합니다.");
-                
-                // 폼 바로 밑에 인라인 경고 배너 동적 생성 및 노출 코드
-                let banner = document.getElementById('booking-error-banner');
-                if (!banner) {
-                    banner = document.createElement('div');
-                    banner.id = 'booking-error-banner';
-                    banner.className = 'booking-restricted-banner';
-                    banner.innerHTML = `
-                        <h4>⚠️ 실시간 진료예약 제한 안내</h4>
-                        <p>현재 비회원(비로그인) 상태이므로 원격 접수가 불가능합니다. 원활한 대기열 배정 및 전산 매핑을 위해 회원가입 후 이용해 주시기 바랍니다.</p>
-                        <button type="button" class="booking-inline-btn" onclick="toggleAuthModal('signup')">💡 즉시 회원가입 하러가기</button>
-                    `;
-                    bookingForm.appendChild(banner);
-                } else {
-                    banner.style.display = 'block';
-                }
-                
-                // 모달 로그인 팝업을 즉시 오픈하여 유저 액션 유도
-                toggleAuthModal('login');
-            } else {
-                // 로그인 상태일 때는 정상 작동 알림
-                alert(`📅 [예약 성공] ${CURRENT_USER_ID} 회원님의 스마트 진료 접수가 정상 완료되었습니다.`);
-            }
-        });
-    }
-}
-
-// 실시간 외래 운영상태 판별 계산기
+// 실시간 외래 운영상태 판별 계산기 (기존 그대로)
 function initRealtimeHours() {
     const ping = document.getElementById('status-ping');
     const dot = document.getElementById('status-dot');
@@ -231,7 +173,7 @@ function initRealtimeHours() {
     setInterval(calc, 30000);
 }
 
-// 카드 선택 시 예약 폼 자동 타게팅 매칭
+// 카드 선택 시 예약 폼 자동 타게팅 매칭 (기존 그대로)
 function preselectDept(deptName) {
     const select = document.getElementById('book-dept');
     if (select) {
@@ -243,7 +185,7 @@ function preselectDept(deptName) {
     }
 }
 
-// 아코디언 공지사항 렌더링
+// 아코디언 공지사항 렌더링 (기존 그대로)
 function renderNotices(listData) {
     const container = document.getElementById('notice-container');
     if (!container) return;
@@ -302,3 +244,60 @@ function filterNotices() {
     renderNotices(filtered);
 }
 
+/* ==========================================================================
+   [새로 추가된 제어 영역] - 기존 구조 변형 없이 하단에 조용히 탑재
+   ========================================================================== */
+
+// 1. 시연/테스트용 모크 로그인 연동 함수
+function handleMockLogin(event) {
+    if(event) event.preventDefault();
+    const loginIdInput = document.querySelector('#modal-login-form input[type="text"]') || document.getElementById('login-id');
+    const userId = loginIdInput ? loginIdInput.value : "환자";
+    
+    IS_LOGGED_IN = true;
+    CURRENT_USER_ID = userId;
+    
+    alert(`🔓 [로그인 성공] ${userId} 회원님 환영합니다! 이제 정상적으로 예약을 신청하실 수 있습니다.`);
+    toggleAuthModal(null); // 모달 닫기
+    
+    // 떠있던 하단 배너 제거
+    const existBanner = document.getElementById('booking-error-banner');
+    if (existBanner) existBanner.style.display = 'none';
+}
+
+// 2. 비회원 접수 방지 및 기존 로그인/회원가입 레이어 팝업 연동 엔진
+function initBookingValidation() {
+    // 팀원분의 기존 예약 form 요소를 안전하게 스캐닝
+    const bookingForm = document.getElementById('booking-form') || document.querySelector('#booking form');
+    
+    if (bookingForm) {
+        bookingForm.addEventListener('submit', (event) => {
+            // 로그인 상태가 아닐 때 인터셉트 차단 시행
+            if (!IS_LOGGED_IN) {
+                event.preventDefault(); // 기본 폼 리프레시 전송 완전 중단
+                
+                // 1) 알림창 띄우기
+                alert("🚨 로그인 후 사용이 가능합니다. 로그인 또는 회원가입을 진행해 주세요.");
+                
+                // 2) 예약 서브밋 하단에 친절한 UI 경고 안내 템플릿 동적 표출
+                let banner = document.getElementById('booking-error-banner');
+                if (!banner) {
+                    banner = document.createElement('div');
+                    banner.id = 'booking-error-banner';
+                    banner.className = 'booking-restricted-banner';
+                    banner.innerHTML = `
+                        <h4>⚠️ 실시간 진료예약 안내</h4>
+                        <p>현재 비회원 상태이므로 전산 접수가 제한됩니다. 회원가입 후 이용 시 신속하게 대기열이 배정됩니다.</p>
+                        <button type="button" class="booking-inline-btn" onclick="toggleAuthModal('signup')">💡 즉시 회원가입 하러가기</button>
+                    `;
+                    bookingForm.appendChild(banner);
+                } else {
+                    banner.style.display = 'block';
+                }
+                
+                // 3) 팀원분이 만들어둔 로그인 모달 팝업 레이어를 즉시 강제 활성화
+                toggleAuthModal('login');
+            }
+        });
+    }
+}
