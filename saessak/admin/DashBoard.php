@@ -1,3 +1,11 @@
+<?php
+session_start();
+// 로그인 안 했으면 로그인 페이지로 튕기기
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit();
+}
+?>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -49,25 +57,28 @@
     <main class="flex-1 flex flex-col overflow-hidden">
         
         <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8 shrink-0">
-            <div class="relative w-96">
-                <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i>
-                <input 
-                    type="text" 
-                    placeholder="환자 이름, 연락처 검색" 
-                    class="w-full pl-10 pr-4 py-2 bg-gray-100 border border-transparent rounded-md focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none"
-                />
+    <div class="relative w-96">
+        <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i>
+        <input type="text" placeholder="환자 이름, 연락처 검색" class="w-full pl-10 pr-4 py-2 bg-gray-100 border border-transparent rounded-md focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none" />
+    </div>
+
+    <div class="flex items-center gap-4">
+        <button class="relative p-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors">
+            <i data-lucide="bell" class="w-6 h-6"></i>
+            <span class="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
+        </button>
+
+        <div class="flex items-center gap-2 pl-4 border-l border-gray-200">
+            <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">
+                <?php echo strtoupper(substr($_SESSION['user_id'], 0, 1)); ?>
             </div>
-            <div class="flex items-center gap-4">
-                <button class="relative p-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors">
-                    <i data-lucide="bell" class="w-6 h-6"></i>
-                    <span class="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
-                </button>
-                <div class="flex items-center gap-2 pl-4 border-l border-gray-200">
-                    <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">A</div>
-                    <span class="font-medium text-sm">관리자님</span>
-                </div>
-            </div>
-        </header>
+            <span class="font-medium text-sm">
+                <?php echo $_SESSION['user_id']; ?>님 환영합니다
+            </span>
+            <a href="include/logout.php" class="ml-2 text-xs text-red-500 hover:underline">로그아웃</a>
+        </div>
+    </div>
+</header>
 
         <div class="flex-1 overflow-auto p-8 space-y-6">
             
