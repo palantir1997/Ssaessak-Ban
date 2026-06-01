@@ -244,42 +244,14 @@ function filterNotices() {
     renderNotices(filtered);
 }
 
-/* ==========================================================================
-   [새로 추가된 제어 영역] - 기존 구조 변형 없이 하단에 조용히 탑재
-   ========================================================================== */
-
-// 1. 시연/테스트용 모크 로그인 연동 함수
-function handleMockLogin(event) {
-    if(event) event.preventDefault();
-    const loginIdInput = document.querySelector('#modal-login-form input[type="text"]') || document.getElementById('login-id');
-    const userId = loginIdInput ? loginIdInput.value : "환자";
-    
-    IS_LOGGED_IN = true;
-    CURRENT_USER_ID = userId;
-    
-    alert(`🔓 [로그인 성공] ${userId} 회원님 환영합니다! 이제 정상적으로 예약을 신청하실 수 있습니다.`);
-    toggleAuthModal(null); // 모달 닫기
-    
-    // 떠있던 하단 배너 제거
-    const existBanner = document.getElementById('booking-error-banner');
-    if (existBanner) existBanner.style.display = 'none';
-}
-
-// 2. 비회원 접수 방지 및 기존 로그인/회원가입 레이어 팝업 연동 엔진
+// 비회원 접수 방지 및 기존 로그인/회원가입 레이어 팝업 연동 엔진 (기존 그대로)
 function initBookingValidation() {
-    // 팀원분의 기존 예약 form 요소를 안전하게 스캐닝
     const bookingForm = document.getElementById('booking-form') || document.querySelector('#booking form');
-    
     if (bookingForm) {
         bookingForm.addEventListener('submit', (event) => {
-            // 로그인 상태가 아닐 때 인터셉트 차단 시행
             if (!IS_LOGGED_IN) {
-                event.preventDefault(); // 기본 폼 리프레시 전송 완전 중단
-                
-                // 1) 알림창 띄우기
+                event.preventDefault();
                 alert("🚨 로그인 후 사용이 가능합니다. 로그인 또는 회원가입을 진행해 주세요.");
-                
-                // 2) 예약 서브밋 하단에 친절한 UI 경고 안내 템플릿 동적 표출
                 let banner = document.getElementById('booking-error-banner');
                 if (!banner) {
                     banner = document.createElement('div');
@@ -294,10 +266,18 @@ function initBookingValidation() {
                 } else {
                     banner.style.display = 'block';
                 }
-                
-                // 3) 팀원분이 만들어둔 로그인 모달 팝업 레이어를 즉시 강제 활성화
                 toggleAuthModal('login');
             }
         });
     }
 }
+
+// [보안 및 강제 예외 이동기 제어 강화] 기존 동작을 해치지 않고 확실히 about.html 실행
+window.addEventListener('click', function(e) {
+    const targetLink = e.target.closest('a');
+    if (targetLink && targetLink.getAttribute('href') === 'about.html') {
+        e.preventDefault();
+        e.stopPropagation();
+        window.location.replace('about.html'); // 브라우저 캐시 및 부드러운 스크롤 충돌을 깨부수고 강제 전환
+    }
+}, true); // 이벤트 캡처링 단계를 활용해 가로채기 차단

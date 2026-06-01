@@ -26,7 +26,7 @@ include_once 'includes/header.php';
                         <a href="#booking" class="px-8 py-4 bg-sprout-600 hover:bg-sprout-700 text-white font-bold rounded-2xl shadow-lg shadow-sprout-200 text-center transition-all transform hover:-translate-y-0.5 text-sm sm:text-base">
                             📅 실시간 간편 외래접수
                         </a>
-                        <a href="about.html" class="px-8 py-4 bg-white hover:bg-gray-50 text-gray-800 font-bold rounded-2xl border border-gray-200/80 text-center transition-all shadow-sm text-sm sm:text-base">
+                        <a href="html/about.html" class="px-8 py-4 bg-white hover:bg-gray-50 text-gray-800 font-bold rounded-2xl border border-gray-200/80 text-center transition-all shadow-sm text-sm sm:text-base">
                             🏥 병원 소개 및 조직도
                         </a>
                     </div>
