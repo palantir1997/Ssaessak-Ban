@@ -281,3 +281,7 @@ window.addEventListener('click', function(e) {
         window.location.replace('about.html'); // 브라우저 캐시 및 부드러운 스크롤 충돌을 깨부수고 강제 전환
     }
 }, true); // 이벤트 캡처링 단계를 활용해 가로채기 차단
+
+function handleImageError(img) {
+    img.style.display = 'none';
+}
