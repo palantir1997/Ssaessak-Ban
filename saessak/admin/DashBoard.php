@@ -1,8 +1,9 @@
 <?php
 session_start();
-// 로그인 안 했으면 로그인 페이지로 튕기기
+
+// 로그인 정보가 없으면 즉시 로그인 페이지로 보냅니다.
 if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
+    header("Location: login.php"); // 로그인 페이지 경로가 맞는지 확인하세요!
     exit();
 }
 ?>
