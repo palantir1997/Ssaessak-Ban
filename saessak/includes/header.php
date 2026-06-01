@@ -48,15 +48,17 @@
 
                 <nav class="hidden md:flex space-x-10 text-base font-semibold">
                     <div class="relative group py-6">
-                        <a href="#about" class="text-gray-600 hover:text-sprout-600 transition-colors flex items-center gap-1">
+                        <!-- 💻 PC용 메인 버튼 주소를 about.html로 연결했습니다 -->
+                        <a href="html/about.html" class="text-gray-600 hover:text-sprout-600 transition-colors flex items-center gap-1">
                             병원소개
                             <svg class="w-4 h-4 text-gray-400 group-hover:text-sprout-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
                         </a>
                         <div class="absolute top-full left-1/2 -translate-x-1/2 w-48 bg-white border border-gray-100 rounded-2xl shadow-xl py-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform translate-y-2 group-hover:translate-y-0">
-                            <a href="#about" class="block px-5 py-2.5 text-sm text-gray-600 hover:bg-sprout-50 hover:text-sprout-700">소개 및 이념</a>
-                            <a href="#organization" class="block px-5 py-2.5 text-sm text-gray-600 hover:bg-sprout-50 hover:text-sprout-700">병원 조직도</a>
-                            <a href="#doctors" class="block px-5 py-2.5 text-sm text-gray-600 hover:bg-sprout-50 hover:text-sprout-700">대표 의료진</a>
-                            <a href="#directions" class="block px-5 py-2.5 text-sm text-gray-600 hover:bg-sprout-50 hover:text-sprout-700">오시는 길</a>
+                            <!-- 드롭다운 서브 메뉴들도 about.html 내의 ID 구역으로 정확히 지정했습니다 -->
+                            <a href="html/about.html" class="block px-5 py-2.5 text-sm text-gray-600 hover:bg-sprout-50 hover:text-sprout-700">소개 및 이념</a>
+                            <a href="html/about.html#organization" class="block px-5 py-2.5 text-sm text-gray-600 hover:bg-sprout-50 hover:text-sprout-700">병원 조직도</a>
+                            <a href="index.php#doctors" class="block px-5 py-2.5 text-sm text-gray-600 hover:bg-sprout-50 hover:text-sprout-700">대표 의료진</a>
+                            <a href="index.php#directions" class="block px-5 py-2.5 text-sm text-gray-600 hover:bg-sprout-50 hover:text-sprout-700">오시는 길</a>
                         </div>
                     </div>
 
@@ -95,8 +97,9 @@
             <div class="space-y-1">
                 <span class="block px-3 py-1.5 text-[10px] font-bold text-gray-400 uppercase tracking-wider">Menu 리스트</span>
                 <div class="pl-2 space-y-1">
-                    <a href="#about" class="block px-3 py-2 rounded-lg text-gray-700 hover:bg-sprout-50 hover:text-sprout-600">소개 및 이념</a>
-                    <a href="#organization" class="block px-3 py-2 rounded-lg text-gray-700 hover:bg-sprout-50 hover:text-sprout-600">병원 조직도</a>
+                    <!-- 📱 모바일용 메뉴 버튼 주소도 about.html로 정확하게 타겟팅했습니다 -->
+                    <a href="html/about.html" class="block px-3 py-2 rounded-lg text-gray-700 hover:bg-sprout-50 hover:text-sprout-600">소개 및 이념</a>
+                    <a href="html/about.html#organization" class="block px-3 py-2 rounded-lg text-gray-700 hover:bg-sprout-50 hover:text-sprout-600">병원 조직도</a>
                     <a href="#doctors" class="block px-3 py-2 rounded-lg text-gray-700 hover:bg-sprout-50 hover:text-sprout-600">대표 의료진</a>
                 </div>
                 <div class="pl-2 pt-2 space-y-1 border-t border-slate-50">
