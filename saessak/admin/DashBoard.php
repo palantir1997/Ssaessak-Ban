@@ -11,7 +11,7 @@ if (!isset($_SESSION['user_id'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MediAdmin - 병원 관리자 페이지</title>
+    <title>SaessakAdmin - 병원 관리자 페이지</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
@@ -39,7 +39,7 @@ if (!isset($_SESSION['user_id'])) {
 
     <aside class="w-64 bg-white border-r border-gray-200 flex flex-col hidden md:flex">
         <div class="p-6 border-b border-gray-200">
-            <h1 class="text-2xl font-bold text-blue-600 tracking-tight">MediAdmin</h1>
+            <h1 class="text-2xl font-bold text-blue-600 tracking-tight">SaessakHospital</h1>
         </div>
         <nav class="flex-1 p-4 space-y-2">
             <a href="#" class="flex items-center gap-3 px-4 py-3 bg-blue-50 text-blue-700 rounded-lg font-medium">
