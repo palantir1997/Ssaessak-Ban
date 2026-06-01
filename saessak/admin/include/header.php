@@ -20,7 +20,7 @@ $isAdmin = (isset($_SESSION['role']) && $_SESSION['role'] === 'admin');
 
     <aside class="w-64 bg-white border-r border-gray-200 flex flex-col hidden md:flex">
         <div class="p-6 border-b border-gray-200">
-            <h1 class="text-2xl font-bold text-blue-600 tracking-tight">SaessakHospital</h1>
+            <a href="dashboard.php" class="text-2xl font-bold text-blue-600 tracking-tight hover:text-blue-800">SaessakHospital</a>
         </div>
         <nav class="flex-1 p-4 space-y-6 overflow-y-auto">
             
