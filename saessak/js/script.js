@@ -1,5 +1,9 @@
 // 새싹병원 전반적인 프론트엔드 인터랙션 제어 스크립트
 
+// [추가] 글로벌 유저 세션 가상 상태 제어 변수
+let IS_LOGGED_IN = false; 
+let CURRENT_USER_ID = "";
+
 // 전역 로컬 정적 소식 데이터
 const LOCAL_NOTICES = [
     {
@@ -34,6 +38,7 @@ let activeNoticeId = null;
 window.addEventListener('DOMContentLoaded', () => {
     initRealtimeHours();
     renderNotices(LOCAL_NOTICES);
+    initBookingValidation(); // [추가] 예약 서브밋 인터셉터 초기화
 
     // 모바일 전용 헤더 토글 이벤트
     const mbBtn = document.getElementById('mobile-menu-btn');
@@ -53,7 +58,7 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// 이미지 에러 방어 처리 (로컬 호스트에 업로드한 원장님 사진이 누락되었을 시, 수려한 SVG 일러스트레이터로 완벽 백업)
+// 이미지 에러 방어 처리
 function handleImageError(imageEl) {
     imageEl.classList.add('hidden');
     const fallbackNode = imageEl.nextElementSibling;
@@ -75,7 +80,11 @@ function validateSignupForm() {
         alert("❌ 비밀번호와 비밀번호 확인 입력값이 일치하지 않습니다.");
         return false;
     }
-    return true;
+    
+    // [추가] 가입 완료 후 로그인 시뮬레이션으로 자연스럽게 연동
+    alert("🎉 회원가입이 정상 완료되었습니다! 가입하신 정보로 로그인을 진행해 주세요.");
+    toggleAuthModal('login');
+    return false; // 실제 백엔드가 없으므로 새로고침 방지용 false
 }
 
 // 회원 통합 팝업 제어
@@ -99,7 +108,64 @@ function toggleAuthModal(type = null) {
     }
 }
 
-// 실시간 외래 운영상태 판별 계산기 (요일 및 시간대 교차 검증)
+// [추가] 로그인 동작 커스텀 함수 생성 (백엔드가 연결되기 전 시연용)
+function handleMockLogin(event) {
+    if(event) event.preventDefault();
+    
+    const loginIdInput = document.querySelector('#modal-login-form input[type="text"]') || document.getElementById('login-id');
+    const userId = loginIdInput ? loginIdInput.value : "환자";
+    
+    IS_LOGGED_IN = true;
+    CURRENT_USER_ID = userId;
+    
+    alert(`🔓 [로그인 성공] ${userId} 회원님 환영합니다! 스마트 진료 예약 시스템을 이용하실 수 있습니다.`);
+    toggleAuthModal(null);
+    
+    // 동적으로 떠있던 경고 배너 숨기기
+    const existBanner = document.getElementById('booking-error-banner');
+    if (existBanner) existBanner.style.display = 'none';
+}
+
+// [추가] 진료접수/예약 시 비회원 철저 차단 및 UI 안내판 동적 삽입 로직
+function initBookingValidation() {
+    // 팀원분의 HTML 구조 안의 예약 form 태그를 타겟팅합니다.
+    const bookingForm = document.querySelector('#booking form') || document.querySelector('form[onsubmit*="book"]');
+    
+    if (bookingForm) {
+        bookingForm.addEventListener('submit', (event) => {
+            // 회원 상태가 아닐 경우 전산 차단 실행
+            if (!IS_LOGGED_IN) {
+                event.preventDefault(); // 서버 전송 중단
+                
+                alert("🚨 [접수 불가] 새싹병원 스마트 예약 시스템은 회원 로그인 상태에서만 이용이 가능합니다.");
+                
+                // 폼 바로 밑에 인라인 경고 배너 동적 생성 및 노출 코드
+                let banner = document.getElementById('booking-error-banner');
+                if (!banner) {
+                    banner = document.createElement('div');
+                    banner.id = 'booking-error-banner';
+                    banner.className = 'booking-restricted-banner';
+                    banner.innerHTML = `
+                        <h4>⚠️ 실시간 진료예약 제한 안내</h4>
+                        <p>현재 비회원(비로그인) 상태이므로 원격 접수가 불가능합니다. 원활한 대기열 배정 및 전산 매핑을 위해 회원가입 후 이용해 주시기 바랍니다.</p>
+                        <button type="button" class="booking-inline-btn" onclick="toggleAuthModal('signup')">💡 즉시 회원가입 하러가기</button>
+                    `;
+                    bookingForm.appendChild(banner);
+                } else {
+                    banner.style.display = 'block';
+                }
+                
+                // 모달 로그인 팝업을 즉시 오픈하여 유저 액션 유도
+                toggleAuthModal('login');
+            } else {
+                // 로그인 상태일 때는 정상 작동 알림
+                alert(`📅 [예약 성공] ${CURRENT_USER_ID} 회원님의 스마트 진료 접수가 정상 완료되었습니다.`);
+            }
+        });
+    }
+}
+
+// 실시간 외래 운영상태 판별 계산기
 function initRealtimeHours() {
     const ping = document.getElementById('status-ping');
     const dot = document.getElementById('status-dot');
@@ -109,7 +175,7 @@ function initRealtimeHours() {
 
     function calc() {
         const now = new Date();
-        const day = now.getDay(); // 0:일, 6:토
+        const day = now.getDay(); 
         const hour = now.getHours();
         const min = now.getMinutes();
         const timeVal = hour * 100 + min;
@@ -129,7 +195,7 @@ function initRealtimeHours() {
                 desc = "토요일 외래 진료가 종료되었습니다.";
             }
         } else {
-            const isNightDay = (day === 2 || day === 4); // 화, 목 야간
+            const isNightDay = (day === 2 || day === 4); 
             if (timeVal >= 900 && timeVal < 1300) {
                 active = true;
                 desc = "평일 오전 외래 진료 중";
@@ -170,7 +236,6 @@ function preselectDept(deptName) {
     const select = document.getElementById('book-dept');
     if (select) {
         select.value = deptName;
-        // 자연스럽게 예약 카드 방향으로 자동 스크롤 이동
         const target = document.getElementById('booking');
         if (target) {
             target.scrollIntoView({ behavior: 'smooth' });
@@ -236,3 +301,4 @@ function filterNotices() {
     });
     renderNotices(filtered);
 }
+
