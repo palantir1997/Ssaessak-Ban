@@ -96,24 +96,24 @@ include_once 'includes/header.php';
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
                 <div class="bg-gray-50 rounded-2xl p-6 border border-gray-100/80 flex flex-col justify-between space-y-6 transition-all hover:shadow-xl hover:bg-white group">
                     <div class="space-y-4">
-                        <div class="w-12 h-12 bg-white rounded-xl shadow-md border border-gray-100 flex items-center justify-center text-2xl group-hover:bg-sprout-600 group-hover:text-white transition-colors">🩺</div>
+                        <div class="w-12 h-12 bg-white rounded-xl shadow-md border border-gray-100 flex items-center justify-center text-2xl group-hover:bg-sprout-600 group-hover:text-white transition-colors">🫁</div>
                         <div class="space-y-1.5">
-                            <h3 class="font-bold text-gray-900 text-base">가정의학과</h3>
+                            <h3 class="font-bold text-gray-900 text-base">호흡기내과</h3>
                             <p class="text-xs text-gray-500 leading-relaxed">만성질환, 생활습관병 관리 및 온 가족 평생 주치의 전담 케어</p>
                         </div>
                     </div>
-                    <button onclick="preselectDept('가정의학과')" class="w-full py-2 bg-white hover:bg-sprout-50 border border-gray-200 text-xs font-bold text-gray-700 hover:text-sprout-600 rounded-xl transition-all">바로 예약</button>
+                    <button onclick="preselectDept('호흡기내과')" class="w-full py-2 bg-white hover:bg-sprout-50 border border-gray-200 text-xs font-bold text-gray-700 hover:text-sprout-600 rounded-xl transition-all">바로 예약</button>
                 </div>
 
                 <div class="bg-gray-50 rounded-2xl p-6 border border-gray-100/80 flex flex-col justify-between space-y-6 transition-all hover:shadow-xl hover:bg-white group">
                     <div class="space-y-4">
                         <div class="w-12 h-12 bg-white rounded-xl shadow-md border border-gray-100 flex items-center justify-center text-2xl group-hover:bg-sprout-600 group-hover:text-white transition-colors">🧬</div>
                         <div class="space-y-1.5">
-                            <h3 class="font-bold text-gray-900 text-base">일반내과</h3>
+                            <h3 class="font-bold text-gray-900 text-base">소화기내과</h3>
                             <p class="text-xs text-gray-500 leading-relaxed">고혈압, 당뇨, 소화기 질환 및 초음파 정밀 영상 진단</p>
                         </div>
                     </div>
-                    <button onclick="preselectDept('내과')" class="w-full py-2 bg-white hover:bg-sprout-50 border border-gray-200 text-xs font-bold text-gray-700 hover:text-sprout-600 rounded-xl transition-all">바로 예약</button>
+                    <button onclick="preselectDept('소화기내과')" class="w-full py-2 bg-white hover:bg-sprout-50 border border-gray-200 text-xs font-bold text-gray-700 hover:text-sprout-600 rounded-xl transition-all">바로 예약</button>
                 </div>
 
                 <div class="bg-gray-50 rounded-2xl p-6 border border-gray-100/80 flex flex-col justify-between space-y-6 transition-all hover:shadow-xl hover:bg-white group">
@@ -129,24 +129,24 @@ include_once 'includes/header.php';
 
                 <div class="bg-gray-50 rounded-2xl p-6 border border-gray-100/80 flex flex-col justify-between space-y-6 transition-all hover:shadow-xl hover:bg-white group">
                     <div class="space-y-4">
-                        <div class="w-12 h-12 bg-white rounded-xl shadow-md border border-gray-100 flex items-center justify-center text-2xl group-hover:bg-sprout-600 group-hover:text-white transition-colors">👶</div>
+                        <div class="w-12 h-12 bg-white rounded-xl shadow-md border border-gray-100 flex items-center justify-center text-2xl group-hover:bg-sprout-600 group-hover:text-white transition-colors">🧠</div>
                         <div class="space-y-1.5">
-                            <h3 class="font-bold text-gray-900 text-base">소아청소년과</h3>
+                            <h3 class="font-bold text-gray-900 text-base">신경과</h3>
                             <p class="text-xs text-gray-500 leading-relaxed">영유아 국가 무료 예방접종 및 소아 급성기 질환 안심 치료</p>
                         </div>
                     </div>
-                    <button onclick="preselectDept('소아청소년과')" class="w-full py-2 bg-white hover:bg-sprout-50 border border-gray-200 text-xs font-bold text-gray-700 hover:text-sprout-600 rounded-xl transition-all">바로 예약</button>
+                    <button onclick="preselectDept('신경과')" class="w-full py-2 bg-white hover:bg-sprout-50 border border-gray-200 text-xs font-bold text-gray-700 hover:text-sprout-600 rounded-xl transition-all">바로 예약</button>
                 </div>
 
                 <div class="bg-gray-50 rounded-2xl p-6 border border-gray-100/80 flex flex-col justify-between space-y-6 transition-all hover:shadow-xl hover:bg-white group">
                     <div class="space-y-4">
                         <div class="w-12 h-12 bg-white rounded-xl shadow-md border border-gray-100 flex items-center justify-center text-2xl group-hover:bg-sprout-600 group-hover:text-white transition-colors">🏥</div>
                         <div class="space-y-1.5">
-                            <h3 class="font-bold text-gray-900 text-base">종합건진센터</h3>
+                            <h3 class="font-bold text-gray-900 text-base">종합검진센터</h3>
                             <p class="text-xs text-gray-500 leading-relaxed">국민건강보험 공단 검진 및 생애주기별 맞춤 정밀 종합 검진</p>
                         </div>
                     </div>
-                    <button onclick="preselectDept('종합건진센터')" class="w-full py-2 bg-white hover:bg-sprout-50 border border-gray-200 text-xs font-bold text-gray-700 hover:text-sprout-600 rounded-xl transition-all">바로 예약</button>
+                    <button onclick="preselectDept('종합검진센터')" class="w-full py-2 bg-white hover:bg-sprout-50 border border-gray-200 text-xs font-bold text-gray-700 hover:text-sprout-600 rounded-xl transition-all">바로 예약</button>
                 </div>
             </div>
         </div>
@@ -163,7 +163,7 @@ include_once 'includes/header.php';
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                 <div class="bg-white rounded-3xl border border-gray-200/60 shadow-sm overflow-hidden flex flex-col">
                     <div class="h-64 bg-slate-100 relative overflow-hidden">
-                        <img src="assets/images/doc_pulmo_01" alt="김주은 원장" onerror="handleImageError(this)" class="doctor-photo w-full h-full object-cover">
+                        <img src="assets/images/doc_pulmo_01.webp" alt="김주은 원장" onerror="handleImageError(this)" class="doctor-photo w-full h-full object-cover">
                         <div class="doctor-fallback hiddne w-full h-full bg-gradient-to-br from-sprout-600 to-emerald-800 flex items-center justify-center text-white text-5xl">🫁</div>
                     </div>
                     <div class="p-6 space-y-4 flex-grow flex flex-col justify-between">
@@ -180,7 +180,7 @@ include_once 'includes/header.php';
 
                 <div class="bg-white rounded-3xl border border-gray-200/60 shadow-sm overflow-hidden flex flex-col">
                     <div class="h-64 bg-slate-100 relative overflow-hidden">
-                        <img src="https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=500&q=80" alt="박건우 과장" onerror="handleImageError(this)" class="doctor-photo w-full h-full object-cover">
+                        <img src="assets/images/doc_gl_01.webp" alt="박건우 과장" onerror="handleImageError(this)" class="doctor-photo w-full h-full object-cover">
                         <div class="doctor-fallback hidden w-full h-full bg-gradient-to-br from-sprout-600 to-emerald-800 flex items-center justify-center text-white text-5xl">🧬</div>
                     </div>
                     <div class="p-6 space-y-4 flex-grow flex flex-col justify-between">
@@ -197,7 +197,7 @@ include_once 'includes/header.php';
 
                 <div class="bg-white rounded-3xl border border-gray-200/60 shadow-sm overflow-hidden flex flex-col">
                     <div class="h-64 bg-slate-100 relative overflow-hidden">
-                        <img src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&w=500&q=80" alt="최시환 과장" onerror="handleImageError(this)" class="doctor-photo w-full h-full object-cover">
+                        <img src="assets/images/doc_os_01.webp" alt="최시환 과장" onerror="handleImageError(this)" class="doctor-photo w-full h-full object-cover">
                         <div class="doctor-fallback hidden w-full h-full bg-gradient-to-br from-sprout-600 to-emerald-800 flex items-center justify-center text-white text-5xl">🦴</div>
                     </div>
                     <div class="p-6 space-y-4 flex-grow flex flex-col justify-between">
@@ -214,7 +214,7 @@ include_once 'includes/header.php';
 
                 <div class="bg-white rounded-3xl border border-gray-200/60 shadow-sm overflow-hidden flex flex-col">
                     <div class="h-64 bg-slate-100 relative overflow-hidden">
-                        <img src="https://images.unsplash.com/photo-1594824813573-246434e33963?auto=format&fit=crop&w=500&q=80" alt="김유진 과장" onerror="handleImageError(this)" class="doctor-photo w-full h-full object-cover">
+                        <img src="assets/images/doc_neuro_01.webp" alt="김유진 과장" onerror="handleImageError(this)" class="doctor-photo w-full h-full object-cover">
                         <div class="doctor-fallback hidden w-full h-full bg-gradient-to-br from-sprout-600 to-emerald-800 flex items-center justify-center text-white text-5xl">🧠</div>
                     </div>
                     <div class="p-6 space-y-4 flex-grow flex flex-col justify-between">
@@ -274,7 +274,7 @@ include_once 'includes/header.php';
                         </thead>
                         <tbody class="divide-y divide-gray-200/60 font-medium text-gray-700">
                             <tr class="hover:bg-white transition-colors">
-                                <td class="py-4 text-left pl-4 font-bold text-gray-900">가정의학과 (김새싹)</td>
+                                <td class="py-4 text-left pl-4 font-bold text-gray-900">호흡기내과 (김주은)</td>
                                 <td class="py-4 text-emerald-600 font-bold">●</td>
                                 <td class="py-4 text-emerald-600 font-bold">●</td>
                                 <td class="py-4 text-gray-300">휴진</td>
@@ -283,7 +283,7 @@ include_once 'includes/header.php';
                                 <td class="py-4 text-emerald-600 font-bold">교대</td>
                             </tr>
                             <tr class="hover:bg-white transition-colors">
-                                <td class="py-4 text-left pl-4 font-bold text-gray-900">일반내과 (박건우)</td>
+                                <td class="py-4 text-left pl-4 font-bold text-gray-900">소화기내과 (박건우)</td>
                                 <td class="py-4 text-emerald-600 font-bold">●</td>
                                 <td class="py-4 text-gray-300">휴진</td>
                                 <td class="py-4 text-emerald-600 font-bold">●</td>
@@ -292,7 +292,7 @@ include_once 'includes/header.php';
                                 <td class="py-4 text-emerald-600 font-bold">교대</td>
                             </tr>
                             <tr class="hover:bg-white transition-colors">
-                                <td class="py-4 text-left pl-4 font-bold text-gray-900">정형외과 (최태양)</td>
+                                <td class="py-4 text-left pl-4 font-bold text-gray-900">정형외과 (최시환)</td>
                                 <td class="py-4 text-emerald-600 font-bold">●</td>
                                 <td class="py-4 text-emerald-600 font-bold">야간</td>
                                 <td class="py-4 text-emerald-600 font-bold">●</td>
@@ -301,7 +301,7 @@ include_once 'includes/header.php';
                                 <td class="py-4 text-emerald-600 font-bold">●</td>
                             </tr>
                             <tr class="hover:bg-white transition-colors">
-                                <td class="py-4 text-left pl-4 font-bold text-gray-900">소아청소년과 (이지민)</td>
+                                <td class="py-4 text-left pl-4 font-bold text-gray-900">신경과 (김유진)</td>
                                 <td class="py-4 text-gray-300">휴진</td>
                                 <td class="py-4 text-emerald-600 font-bold">●</td>
                                 <td class="py-4 text-emerald-600 font-bold">●</td>
@@ -364,10 +364,10 @@ include_once 'includes/header.php';
                             <select id="book-dept" required class="w-full px-4 py-3.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-sprout-500 bg-gray-50/50">
                                 <option value="" disabled selected>선택해 주세요</option>
                                 <option value="호흡기내과">호흡기내과 (김주은 원장)</option>
-                                <option value="내과">내과 (박건우 과장)</option>
-                                <option value="정형외과">정형외과 ( 과장)</option>
-                                <option value="소아청소년과">신경과 (김유진 과장)</option>
-                                <!-- <option value="종합건진센터">종합건진센터 (한무진 소장)</option> -->
+                                <option value="소화기내과">소화기내과 (박건우 과장)</option>
+                                <option value="정형외과">정형외과 (최시환 과장)</option>
+                                <option value="신경과">신경과 (김유진 과장)</option>
+                                <!-- <option value="종합검진센터">종합검진센터 (한무진 소장)</option> -->
                             </select>
                         </div>
                         <div>
