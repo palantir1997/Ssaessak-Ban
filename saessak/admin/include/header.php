@@ -53,9 +53,9 @@ $isAdmin = (isset($_SESSION['role']) && $_SESSION['role'] === 'admin');
             <div class="pt-4 border-t border-gray-200">
                 <p class="text-xs font-bold text-red-400 uppercase tracking-wider mb-2 px-4">보안 관리 (Admin)</p>
                 <div class="space-y-1">
-                    <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-red-600 hover:bg-red-50 rounded-lg font-medium"><i data-lucide="shield-alert" class="w-4 h-4"></i> 보안 관제 대시보드</a>
-                    <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-red-600 hover:bg-red-50 rounded-lg font-medium"><i data-lucide="terminal" class="w-4 h-4"></i> 보안 점검 도구</a>
-                    <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-red-600 hover:bg-red-50 rounded-lg font-medium"><i data-lucide="file-lock" class="w-4 h-4"></i> 침입 탐지 로그</a>
+                   <a href="security_grafana.php" class="flex items-center gap-3 px-4 py-2.5 text-red-600 hover:bg-red-50 rounded-lg font-medium"><i data-lucide="shield-alert" class="w-4 h-4"></i> 보안 관제 대시보드</a>
+<a href="security_tools.php" class="flex items-center gap-3 px-4 py-2.5 text-red-600 hover:bg-red-50 rounded-lg font-medium"><i data-lucide="terminal" class="w-4 h-4"></i> 보안 점검 도구</a>
+<a href="security_logs.php" class="flex items-center gap-3 px-4 py-2.5 text-red-600 hover:bg-red-50 rounded-lg font-medium"><i data-lucide="file-lock" class="w-4 h-4"></i> 침입 탐지 로그</a>
                 </div>
             </div>
             <?php endif; ?>
