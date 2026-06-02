@@ -163,13 +163,13 @@ include_once 'includes/header.php';
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                 <div class="bg-white rounded-3xl border border-gray-200/60 shadow-sm overflow-hidden flex flex-col">
                     <div class="h-64 bg-slate-100 relative overflow-hidden">
-                        <img src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=500&q=80" alt="김새싹 원장" onerror="handleImageError(this)" class="doctor-photo w-full h-full object-cover">
-                        <div class="doctor-fallback hidden w-full h-full bg-gradient-to-br from-sprout-600 to-emerald-800 flex items-center justify-center text-white text-5xl">🩺</div>
+                        <img src="assets/images/doc_pulmo_01" alt="김주은 원장" onerror="handleImageError(this)" class="doctor-photo w-full h-full object-cover">
+                        <div class="doctor-fallback hiddne w-full h-full bg-gradient-to-br from-sprout-600 to-emerald-800 flex items-center justify-center text-white text-5xl">🫁</div>
                     </div>
                     <div class="p-6 space-y-4 flex-grow flex flex-col justify-between">
                         <div class="space-y-1">
-                            <span class="text-[10px] font-bold text-sprout-600 uppercase tracking-wide">가정의학과 전문의</span>
-                            <h3 class="text-lg font-bold text-gray-900">김새싹 대표원장</h3>
+                            <span class="text-[10px] font-bold text-sprout-600 uppercase tracking-wide">호흡기내과 전문의</span>
+                            <h3 class="text-lg font-bold text-gray-900">김주은 원장</h3>
                             <p class="text-xs text-gray-500 leading-relaxed pt-1">연세대학교 의과대학 졸업<br>전 세브란스병원 임상교수</p>
                         </div>
                         <div class="bg-slate-50 p-3 rounded-xl text-[11px] text-gray-600 font-medium leading-normal">
@@ -197,13 +197,13 @@ include_once 'includes/header.php';
 
                 <div class="bg-white rounded-3xl border border-gray-200/60 shadow-sm overflow-hidden flex flex-col">
                     <div class="h-64 bg-slate-100 relative overflow-hidden">
-                        <img src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&w=500&q=80" alt="최태양 과장" onerror="handleImageError(this)" class="doctor-photo w-full h-full object-cover">
+                        <img src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&w=500&q=80" alt="최시환 과장" onerror="handleImageError(this)" class="doctor-photo w-full h-full object-cover">
                         <div class="doctor-fallback hidden w-full h-full bg-gradient-to-br from-sprout-600 to-emerald-800 flex items-center justify-center text-white text-5xl">🦴</div>
                     </div>
                     <div class="p-6 space-y-4 flex-grow flex flex-col justify-between">
                         <div class="space-y-1">
                             <span class="text-[10px] font-bold text-amber-600 uppercase tracking-wide">정형외과 전문의 [신규초빙]</span>
-                            <h3 class="text-lg font-bold text-gray-900">최태양 진료과장</h3>
+                            <h3 class="text-lg font-bold text-gray-900">최시환 진료과장</h3>
                             <p class="text-xs text-gray-500 leading-relaxed pt-1">고려대학교 의과대학 졸업<br>대한정형외과학회 정회원</p>
                         </div>
                         <div class="bg-amber-50/50 p-3 rounded-xl text-[11px] text-amber-900/80 font-medium leading-normal">
@@ -214,17 +214,17 @@ include_once 'includes/header.php';
 
                 <div class="bg-white rounded-3xl border border-gray-200/60 shadow-sm overflow-hidden flex flex-col">
                     <div class="h-64 bg-slate-100 relative overflow-hidden">
-                        <img src="https://images.unsplash.com/photo-1594824813573-246434e33963?auto=format&fit=crop&w=500&q=80" alt="이지민 과장" onerror="handleImageError(this)" class="doctor-photo w-full h-full object-cover">
-                        <div class="doctor-fallback hidden w-full h-full bg-gradient-to-br from-sprout-600 to-emerald-800 flex items-center justify-center text-white text-5xl">👶</div>
+                        <img src="https://images.unsplash.com/photo-1594824813573-246434e33963?auto=format&fit=crop&w=500&q=80" alt="김유진 과장" onerror="handleImageError(this)" class="doctor-photo w-full h-full object-cover">
+                        <div class="doctor-fallback hidden w-full h-full bg-gradient-to-br from-sprout-600 to-emerald-800 flex items-center justify-center text-white text-5xl">🧠</div>
                     </div>
                     <div class="p-6 space-y-4 flex-grow flex flex-col justify-between">
                         <div class="space-y-1">
-                            <span class="text-[10px] font-bold text-sprout-600 uppercase tracking-wide">소아청소년과 전문의</span>
-                            <h3 class="text-lg font-bold text-gray-900">이지민 진료과장</h3>
-                            <p class="text-xs text-gray-500 leading-relaxed pt-1">가톨릭대학교 의과대학 졸업<br>전 서울성모병원 소아과 진료의</p>
+                            <span class="text-[10px] font-bold text-sprout-600 uppercase tracking-wide">신경과 전문의</span>
+                            <h3 class="text-lg font-bold text-gray-900">김유진 진료과장</h3>
+                            <p class="text-xs text-gray-500 leading-relaxed pt-1">가톨릭대학교 의과대학 졸업<br>전 서울성모병원 신경과 진료의</p>
                         </div>
                         <div class="bg-slate-50 p-3 rounded-xl text-[11px] text-gray-600 font-medium leading-normal">
-                            "내 아이를 진료하는 어머니의 마음으로 따뜻하고 명쾌하게 진료하겠습니다."
+                            "내 부모님을 진료하는 자식의 마음으로 따뜻하고 명쾌하게 진료하겠습니다."
                         </div>
                     </div>
                 </div>
@@ -363,11 +363,11 @@ include_once 'includes/header.php';
                             <label class="block text-xs font-bold text-gray-500 mb-2">희망 진료 과목</label>
                             <select id="book-dept" required class="w-full px-4 py-3.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-sprout-500 bg-gray-50/50">
                                 <option value="" disabled selected>선택해 주세요</option>
-                                <option value="가정의학과">가정의학과 (김새싹 원장)</option>
+                                <option value="호흡기내과">호흡기내과 (김주은 원장)</option>
                                 <option value="내과">내과 (박건우 과장)</option>
-                                <option value="정형외과">정형외과 (최태양 과장)</option>
-                                <option value="소아청소년과">소아청소년과 (이지민 과장)</option>
-                                <option value="종합건진센터">종합건진센터 (한소희 소장)</option>
+                                <option value="정형외과">정형외과 ( 과장)</option>
+                                <option value="소아청소년과">신경과 (김유진 과장)</option>
+                                <!-- <option value="종합건진센터">종합건진센터 (한무진 소장)</option> -->
                             </select>
                         </div>
                         <div>

@@ -40,7 +40,7 @@ window.addEventListener('DOMContentLoaded', () => {
     renderNotices(LOCAL_NOTICES);
     initBookingValidation(); // [추가만 진행] 예약 서브밋 인터셉터 작동
 
-    // 모바일 전용 헤더 토글 이벤트 (기존 그대로)
+    // 모바일 전용 헤더 토글 이벤트 
     const mbBtn = document.getElementById('mobile-menu-btn');
     const mbMenu = document.getElementById('mobile-menu');
     if (mbBtn && mbMenu) {
@@ -49,7 +49,7 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 날짜 선택기 기본 마지노선 구축 (기존 그대로)
+    // 날짜 선택기 기본 마지노선 구축 
     const dtInput = document.getElementById('book-date');
     if (dtInput) {
         const today = new Date().toISOString().split('T')[0];
@@ -58,7 +58,7 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// 이미지 에러 방어 처리 (기존 그대로)
+// 이미지 에러 방어 처리 
 function handleImageError(imageEl) {
     imageEl.classList.add('hidden');
     const fallbackNode = imageEl.nextElementSibling;
@@ -67,7 +67,7 @@ function handleImageError(imageEl) {
     }
 }
 
-// 회원가입 클라이언트 예방 유효성 검증 (기존 그대로)
+// 회원가입 클라이언트 예방 유효성 검증 
 function validateSignupForm() {
     const pw = document.getElementById('signup-pw').value;
     const confirm = document.getElementById('signup-pw-confirm').value;
@@ -86,7 +86,7 @@ function validateSignupForm() {
     return false; 
 }
 
-// 회원 통합 팝업 제어 (기존 그대로)
+// 회원 통합 팝업 제어 
 function toggleAuthModal(type = null) {
     const modal = document.getElementById('auth-modal');
     const loginForm = document.getElementById('modal-login-form');
@@ -107,7 +107,7 @@ function toggleAuthModal(type = null) {
     }
 }
 
-// 실시간 외래 운영상태 판별 계산기 (기존 그대로)
+// 실시간 외래 운영상태 판별 계산기 
 function initRealtimeHours() {
     const ping = document.getElementById('status-ping');
     const dot = document.getElementById('status-dot');
@@ -173,7 +173,7 @@ function initRealtimeHours() {
     setInterval(calc, 30000);
 }
 
-// 카드 선택 시 예약 폼 자동 타게팅 매칭 (기존 그대로)
+// 카드 선택 시 예약 폼 자동 타게팅 매칭 
 function preselectDept(deptName) {
     const select = document.getElementById('book-dept');
     if (select) {
@@ -185,7 +185,7 @@ function preselectDept(deptName) {
     }
 }
 
-// 아코디언 공지사항 렌더링 (기존 그대로)
+// 아코디언 공지사항 렌더링 
 function renderNotices(listData) {
     const container = document.getElementById('notice-container');
     if (!container) return;
@@ -244,7 +244,7 @@ function filterNotices() {
     renderNotices(filtered);
 }
 
-// 비회원 접수 방지 및 기존 로그인/회원가입 레이어 팝업 연동 엔진 (기존 그대로)
+// 비회원 접수 방지 및 기존 로그인/회원가입 레이어 팝업 연동 엔진 
 function initBookingValidation() {
     const bookingForm = document.getElementById('booking-form') || document.querySelector('#booking form');
     if (bookingForm) {
