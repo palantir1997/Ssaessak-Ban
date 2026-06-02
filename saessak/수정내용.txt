@@ -1,13 +1,14 @@
 수정한 부분만 정리:
-1) index.php의 병원소개 버튼 링크를 about.html → html/about.html 로 수정
-2) includes/header.php의 병원소개/조직도 링크를 about.html → html/about.html 로 수정
-3) html/about.html을 단독 실행 가능한 완성 HTML로 감쌈
-   - 기존 about 본문 내용은 그대로 유지
-   - 폰트 Pretendard, Tailwind 설정 유지
-   - CSS 경로는 ../css/style.css 로 맞춤
-4) 혹시 루트 about.html로 들어가도 html/about.html로 자동 이동하도록 about.html 리다이렉트 파일 추가
+1) 환자 로그인 계정은 patient / 1234 로 고정
+2) 관리자 계정 admin / 1234 는 건드리지 않음
+3) 환자 로그인/로그아웃은 includes/login_process.php, includes/logout.php만 사용
+4) 환자 세션(patient_id, patient_login_id, patient_name)과 관리자 세션을 분리
+5) MySQL이 꺼져 있어도 메인 페이지가 죽지 않게 db.php를 수정
+6) MySQL이 꺼져 있어도 발표용 환자 계정 patient / 1234 는 로그인 가능
+7) MySQL을 켜고 test.sql을 import하면 patients 테이블에도 patient 계정이 들어감
 
 적용 방법:
-- C:\xampp\htdocs\Ssaessak-Ban\saessak 안에 있는 같은 파일 위치에 덮어쓰기
-- 주소: http://localhost/Ssaessak-Ban/saessak/index.php
-- 병원 안내 버튼 누르면 http://localhost/Ssaessak-Ban/saessak/html/about.html 로 이동해야 함
+- C:\xampp\htdocs\Ssaessak-Ban\saessak 안에 덮어쓰기
+- 브라우저에서 Ctrl + Shift + R 강력 새로고침
+- 환자 로그인: patient / 1234
+- 관리자 로그인: admin / 1234

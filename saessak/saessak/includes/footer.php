@@ -50,7 +50,7 @@
                 <form action="includes/login_process.php" method="POST" class="space-y-4">
                     <div>
                         <label class="block text-xs font-semibold text-gray-700 mb-1.5">이메일 주소</label>
-                        <input type="text" id="login-email" name="login_id" required placeholder="patient01" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-sprout-500 focus:outline-none focus:ring-2 focus:ring-sprout-100 transition-all text-sm" />
+                        <input type="text" id="login-email" name="login_id" required placeholder="patient" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-sprout-500 focus:outline-none focus:ring-2 focus:ring-sprout-100 transition-all text-sm" />
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-gray-700 mb-1.5">비밀번호</label>
@@ -107,6 +107,10 @@
             </div>
         </div>
     </div>
+
+    <script>
+        window.SAESSAK_PATIENT_LOGGED_IN = <?php echo isset($_SESSION['patient_login_id']) ? 'true' : 'false'; ?>;
+    </script>
 
     <!-- 스크립트 파일 연동 -->
     <script src="js/script.js"></script>

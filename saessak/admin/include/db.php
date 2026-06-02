@@ -1,9 +1,9 @@
 <?php
-
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
-$conn = mysqli_connect("localhost", "root", "", "saessak");
+mysqli_report(MYSQLI_REPORT_OFF);
+$conn = @mysqli_connect('localhost', 'root', '', 'saessak');
 if (!$conn) {
-    die("DB 연결 실패: " . mysqli_connect_error());
+    echo "<script>alert('DB 연결 실패: XAMPP에서 MySQL을 Start 했는지 확인해 주세요.'); history.back();</script>";
+    exit();
 }
+mysqli_set_charset($conn, 'utf8mb4');
 ?>
