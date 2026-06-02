@@ -20,14 +20,14 @@ $isAdmin = (isset($_SESSION['role']) && $_SESSION['role'] === 'admin');
 
     <aside class="w-64 bg-white border-r border-gray-200 flex flex-col hidden md:flex">
         <div class="p-6 border-b border-gray-200">
-            <a href="Dashboard.php" class="text-2xl font-bold text-blue-600 tracking-tight hover:text-blue-800">SaessakHospital</a>
+            <a href="DashBoard.php" class="text-2xl font-bold text-blue-600 tracking-tight hover:text-blue-800">SaessakHospital</a>
         </div>
         <nav class="flex-1 p-4 space-y-6 overflow-y-auto">
             
             <div>
                 <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 px-4">환자 진료 관리</p>
                 <div class="space-y-1">
-                    <a href="Dashboard.php" class="flex items-center gap-3 px-4 py-2.5 text-gray-600 hover:bg-gray-100 rounded-lg"><i data-lucide="activity" class="w-4 h-4"></i> 대시보드</a>
+                    <a href="DashBoard.php" class="flex items-center gap-3 px-4 py-2.5 text-gray-600 hover:bg-gray-100 rounded-lg"><i data-lucide="activity" class="w-4 h-4"></i> 대시보드</a>
                     <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-gray-600 hover:bg-gray-100 rounded-lg"><i data-lucide="user-plus" class="w-4 h-4"></i> 접수/예약</a>
                     <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-gray-600 hover:bg-gray-100 rounded-lg"><i data-lucide="file-text" class="w-4 h-4"></i> 진료 기록/차트</a>
                 </div>
