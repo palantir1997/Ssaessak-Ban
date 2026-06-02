@@ -64,7 +64,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // [2] 우분투 실시간 DB 현황 조회 (SELECT 로직)
 // ==========================================
 // SQL 쿼리문: 테이블에 입력된 데이터들을 진료 희망 시간 순서대로 정렬하여 긁어옵니다.
-$select_query = "SELECT * FROM receptions WHERE target_date = '2026-06-02' ORDER BY target_time ASC";
+// [2] 우분투 실시간 DB 현황 조회 (SELECT 로직) 수정
+// 오늘 날짜를 PHP에서 자동으로 가져와서 쿼리 조건으로 사용합니다.
+$today = date('Y-m-d'); 
+$select_query = "SELECT * FROM receptions WHERE target_date = '$today' ORDER BY target_time ASC";
 $result = mysqli_query($conn, $select_query);
 
 $reservations = [];
@@ -72,6 +75,9 @@ if ($result) {
     while ($row = mysqli_fetch_assoc($result)) {
         $reservations[] = $row;
     }
+} else {
+    // 쿼리 자체가 실패하면 에러를 출력해줍니다.
+    echo "쿼리 에러: " . mysqli_error($conn);
 }
 
 
