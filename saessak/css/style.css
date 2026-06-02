@@ -132,3 +132,8 @@
     cursor: pointer;
 }
 .action-btn:hover { background-color: #e2e8f0; }
+
+/* --- 장비 상태 뱃지 스타일 --- */
+.badge-available { background-color: #dcfce7; color: #166534; } /* 사용 가능 (녹색) */
+.badge-inuse { background-color: #dbeafe; color: #1e3a8a; }     /* 사용 중 (파랑) */
+.badge-repair { background-color: #fee2e2; color: #991b1b; }    /* 수리/점검 중 (빨강) */
