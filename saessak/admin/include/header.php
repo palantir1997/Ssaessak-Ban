@@ -28,24 +28,24 @@ $isAdmin = (isset($_SESSION['role']) && $_SESSION['role'] === 'admin');
                 <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 px-4">환자 진료 관리</p>
                 <div class="space-y-1">
                     <a href="DashBoard.php" class="flex items-center gap-3 px-4 py-2.5 text-gray-600 hover:bg-gray-100 rounded-lg"><i data-lucide="activity" class="w-4 h-4"></i> 대시보드</a>
-                    <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-gray-600 hover:bg-gray-100 rounded-lg"><i data-lucide="user-plus" class="w-4 h-4"></i> 접수/예약</a>
-                    <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-gray-600 hover:bg-gray-100 rounded-lg"><i data-lucide="file-text" class="w-4 h-4"></i> 진료 기록/차트</a>
+                    <a href="reception.php" class="flex items-center gap-3 px-4 py-2.5 text-gray-600 hover:bg-gray-100 rounded-lg"><i data-lucide="user-plus" class="w-4 h-4"></i> 접수/예약</a>
+                    <a href="chart.php" class="flex items-center gap-3 px-4 py-2.5 text-gray-600 hover:bg-gray-100 rounded-lg"><i data-lucide="file-text" class="w-4 h-4"></i> 진료 기록/차트</a>
                 </div>
             </div>
 
             <div>
                 <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 px-4">의료 자원 관리</p>
                 <div class="space-y-1">
-                    <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-gray-600 hover:bg-gray-100 rounded-lg"><i data-lucide="stethoscope" class="w-4 h-4"></i> 의료진 관리</a>
-                    <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-gray-600 hover:bg-gray-100 rounded-lg"><i data-lucide="cpu" class="w-4 h-4"></i> 의료 장비 관리</a>
+                    <a href="mdppl.php" class="flex items-center gap-3 px-4 py-2.5 text-gray-600 hover:bg-gray-100 rounded-lg"><i data-lucide="stethoscope" class="w-4 h-4"></i> 의료진 관리</a>
+                    <a href="equipment_manage.php" class="flex items-center gap-3 px-4 py-2.5 text-gray-600 hover:bg-gray-100 rounded-lg"><i data-lucide="cpu" class="w-4 h-4"></i> 의료 장비 관리</a>
                 </div>
             </div>
 
             <div>
                 <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 px-4">원무/행정 관리</p>
                 <div class="space-y-1">
-                    <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-gray-600 hover:bg-gray-100 rounded-lg"><i data-lucide="shield-user" class="w-4 h-4"></i> 직원 계정 관리</a>
-                    <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-gray-600 hover:bg-gray-100 rounded-lg"><i data-lucide="megaphone" class="w-4 h-4"></i> 공지사항</a>
+                    <a href="staff_account.php" class="flex items-center gap-3 px-4 py-2.5 text-gray-600 hover:bg-gray-100 rounded-lg"><i data-lucide="shield-user" class="w-4 h-4"></i> 직원 계정 관리</a>
+                    <a href="notice.php" class="flex items-center gap-3 px-4 py-2.5 text-gray-600 hover:bg-gray-100 rounded-lg"><i data-lucide="megaphone" class="w-4 h-4"></i> 공지사항</a>
                 </div>
             </div>
 
