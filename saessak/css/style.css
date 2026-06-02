@@ -79,3 +79,56 @@
 .booking-inline-btn:hover {
     background-color: #c53030;
 }
+
+
+/* --- 테이블 스타일 (직원 목록 등) --- */
+.table-container {
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    margin-top: 2rem;
+    overflow-x: auto;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.data-table th, .data-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.data-table th {
+    background-color: #f8fafc;
+    color: #475569;
+    font-weight: 600;
+}
+
+.data-table tr:hover {
+    background-color: #f1f5f9;
+}
+
+/* 뱃지 스타일 (역할 구분용) */
+.badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.badge-doctor { background-color: #dbeafe; color: #1e3a8a; }
+.badge-nurse { background-color: #fce7f3; color: #9d174d; }
+
+.action-btn {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.875rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    background-color: white;
+    cursor: pointer;
+}
+.action-btn:hover { background-color: #e2e8f0; }
