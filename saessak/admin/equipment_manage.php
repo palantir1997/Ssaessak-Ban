@@ -1,10 +1,20 @@
+
 <?php
+echo "VC TEST";
+exit();
+echo "<h1 style='background:red;color:white'>HEADER TEST</h1>";
 // 1. 헤더 불러오기 (경로는 파일 구조에 맞게 유지)
-include '../include/header.php';
+include './include/header.php';
+?>
+
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../css/patient.css">
+
+<?php
 
 // 2. 이 페이지 전용 DB 연결 (방금 만든 우분투 계정 사용!)
-$db_host = '192.168.0.53';
-$db_user = 'saessak_user';
+$db_host = '175.210.161.42';
+$db_user = 'DH';
 $db_pass = '1234';
 $db_name = 'saessak';
 
@@ -177,4 +187,4 @@ function get_equip_status_color($status) {
     </div>
 </div>
 
-<?php include '../includes/footer.php'; ?>
+<?php // include './include/footer.php'; ?>
