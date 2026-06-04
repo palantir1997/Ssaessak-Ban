@@ -1,5 +1,5 @@
 <?php
-include 'include/header.php';
+include 'includes/header.php';
 include 'includes/db.php';
 
 $mock_equip_list = [
