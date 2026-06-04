@@ -163,7 +163,7 @@ include_once 'includes/header.php';
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                 <div class="bg-white rounded-3xl border border-gray-200/60 shadow-sm overflow-hidden flex flex-col">
                     <div class="h-64 bg-slate-100 relative overflow-hidden">
-                        <img src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=500&q=80" alt="김새싹 원장" onerror="handleImageError(this)" class="doctor-photo w-full h-full object-cover">
+                        <img src="../assets/images/doc_01.webp" alt="김새싹 원장" onerror="handleImageError(this)" class="doctor-photo w-full h-full object-cover">
                         <div class="doctor-fallback hidden w-full h-full bg-gradient-to-br from-sprout-600 to-emerald-800 flex items-center justify-center text-white text-5xl">🩺</div>
                     </div>
                     <div class="p-6 space-y-4 flex-grow flex flex-col justify-between">
