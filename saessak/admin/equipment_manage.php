@@ -1,5 +1,5 @@
 <?php
-include 'includes/header.php';
+include 'include/header.php';
 include 'includes/db.php'; 
 
 // 1. [INSERT] 신규 장비 폼 제출 처리
