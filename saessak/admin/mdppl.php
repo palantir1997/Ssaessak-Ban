@@ -1,15 +1,52 @@
 <?php
-include 'include/header.php';
+// 1. 헤더 불러오기 (CSS/JS 연동을 위해 상대경로 '../includes/' 사용)
+include '../includes/header.php';
 
-$mock_staff_list = [
-    ["staff_id" => "DR-1001", "name" => "김새싹", "role" => "의사", "dept" => "가정의학과", "phone" => "010-1234-5678", "status" => "재직중", "join_date" => "2023-03-01"],
-    ["staff_id" => "DR-1002", "name" => "박건우", "role" => "의사", "dept" => "일반내과", "phone" => "010-2345-6789", "status" => "재직중", "join_date" => "2023-05-15"],
-    ["staff_id" => "DR-1003", "name" => "최태양", "role" => "의사", "dept" => "정형외과", "phone" => "010-3456-7890", "status" => "재직중", "join_date" => "2026-01-10"],
-    ["staff_id" => "DR-1004", "name" => "이지민", "role" => "의사", "dept" => "소아청소년과", "phone" => "010-4567-8901", "status" => "재직중", "join_date" => "2024-02-20"],
-    ["staff_id" => "NR-2001", "name" => "한소희", "role" => "간호사", "dept" => "종합건진센터", "phone" => "010-5678-9012", "status" => "재직중", "join_date" => "2022-07-01"],
-    ["staff_id" => "NR-2002", "name" => "정다은", "role" => "간호사", "dept" => "일반내과", "phone" => "010-6789-0123", "status" => "휴직중", "join_date" => "2023-09-01"],
-];
+// ==========================================
+// 2. [독립형 DB 연결] db.php 우회, 타임아웃 방지
+// ==========================================
+$db_host = '192.168.0.100'; 
+$db_user = 'saessak_user'; 
+$db_pass = '1234';         
+$db_name = 'saessak';      
 
+$conn = mysqli_connect($db_host, $db_user, $db_pass, $db_name);
+
+if (!$conn) {
+    echo "<div style='background-color:#fee2e2; color:#991b1b; padding:15px; margin-bottom:20px; rounded:8px;'>";
+    echo "<strong>[DB 연결 실패]</strong> 에러 내용: " . mysqli_connect_error();
+    echo "</div>";
+} else {
+    mysqli_set_charset($conn, 'utf8mb4');
+
+    // 3. [INSERT] 신규 의료진 등록 처리
+    if ($_SERVER["REQUEST_METHOD"] == "POST" && !empty($_POST['staff_name'])) {
+        $name = mysqli_real_escape_string($conn, $_POST['staff_name']);
+        $role = mysqli_real_escape_string($conn, $_POST['staff_role']);
+        $dept = mysqli_real_escape_string($conn, $_POST['dept_name']);
+        $phone = mysqli_real_escape_string($conn, $_POST['staff_phone']);
+        $join_date = mysqli_real_escape_string($conn, $_POST['join_date']);
+        $status = '재직중'; // 초기 등록 시 기본 상태
+
+        $sql_insert = "INSERT INTO medical_staff (name, role, dept, phone, join_date, status) 
+                       VALUES ('$name', '$role', '$dept', '$phone', '$join_date', '$status')";
+
+        if (mysqli_query($conn, $sql_insert)) {
+            // 새로고침 시 중복 데이터가 들어가지 않도록 페이지 재이동
+            echo "<script>alert('신규 의료진이 등록되었습니다.'); location.href='mdppl.php';</script>";
+            exit();
+        } else {
+            echo "<script>alert('등록 오류: " . mysqli_error($conn) . "');</script>";
+        }
+    }
+
+    // 4. [SELECT] DB에서 의료진 목록 불러오기
+    $sql_select = "SELECT * FROM medical_staff ORDER BY created_at DESC";
+    $result_staff = mysqli_query($conn, $sql_select);
+}
+// ==========================================
+
+// 뱃지 색상 함수
 function get_role_color($role) {
     switch ($role) {
         case '의사':   return 'bg-blue-100 text-blue-700 border-blue-200';
@@ -28,20 +65,19 @@ function get_status_color($status) {
 }
 ?>
 
-<!-- 신규 의료진 등록 폼 -->
 <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6 mb-6">
     <h2 class="text-lg font-bold text-gray-800 mb-4">신규 의료진 등록</h2>
     <form id="staff_form" action="" method="POST">
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
             <div>
                 <label class="block text-xs font-bold text-gray-500 mb-1">성명</label>
-                <input type="text" id="staff_name" name="staff_name"
+                <input type="text" id="staff_name" name="staff_name" required
                     class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500"
                     placeholder="예: 홍길동">
             </div>
             <div>
                 <label class="block text-xs font-bold text-gray-500 mb-1">직책</label>
-                <select id="staff_role" name="staff_role"
+                <select id="staff_role" name="staff_role" required
                     class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500">
                     <option value="">직책 선택</option>
                     <option value="의사">의사</option>
@@ -52,7 +88,7 @@ function get_status_color($status) {
             </div>
             <div>
                 <label class="block text-xs font-bold text-gray-500 mb-1">담당 진료과</label>
-                <select id="dept_name" name="dept_name"
+                <select id="dept_name" name="dept_name" required
                     class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500">
                     <option value="">진료과 선택</option>
                     <option value="가정의학과">가정의학과</option>
@@ -67,13 +103,13 @@ function get_status_color($status) {
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
             <div>
                 <label class="block text-xs font-bold text-gray-500 mb-1">연락처</label>
-                <input type="text" id="staff_phone" name="staff_phone"
+                <input type="text" id="staff_phone" name="staff_phone" required
                     class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500"
                     placeholder="010-0000-0000">
             </div>
             <div>
                 <label class="block text-xs font-bold text-gray-500 mb-1">입사일</label>
-                <input type="date" id="join_date" name="join_date"
+                <input type="date" id="join_date" name="join_date" required
                     class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500">
             </div>
         </div>
@@ -85,7 +121,6 @@ function get_status_color($status) {
     </form>
 </div>
 
-<!-- 의료진 현황 테이블 -->
 <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
     <div class="p-5 border-b border-gray-200 bg-gray-50/50">
         <h2 class="text-lg font-bold text-gray-800">의료진 현황</h2>
@@ -105,9 +140,12 @@ function get_status_color($status) {
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
-                <?php foreach ($mock_staff_list as $staff): ?>
+                <?php 
+                if (isset($conn) && $conn && isset($result_staff) && mysqli_num_rows($result_staff) > 0):
+                    while ($staff = mysqli_fetch_assoc($result_staff)): 
+                ?>
                 <tr class="hover:bg-gray-50 transition-colors">
-                    <td class="px-6 py-4 text-gray-400 font-mono text-xs"><?php echo htmlspecialchars($staff['staff_id']); ?></td>
+                    <td class="px-6 py-4 text-gray-400 font-mono text-xs"><?php echo htmlspecialchars($staff['id']); ?></td>
                     <td class="px-6 py-4 font-bold text-gray-800"><?php echo htmlspecialchars($staff['name']); ?></td>
                     <td class="px-6 py-4">
                         <span class="px-3 py-1 rounded-full text-xs font-bold border <?php echo get_role_color($staff['role']); ?>">
@@ -129,10 +167,19 @@ function get_status_color($status) {
                         </div>
                     </td>
                 </tr>
-                <?php endforeach; ?>
+                <?php 
+                    endwhile; 
+                else: 
+                ?>
+                <tr>
+                    <td colspan="8" class="px-6 py-8 text-center text-gray-500">
+                        <?php echo (isset($conn) && $conn) ? '등록된 의료진이 없습니다.' : 'DB 연결 문제로 데이터를 불러올 수 없습니다.'; ?>
+                    </td>
+                </tr>
+                <?php endif; ?>
             </tbody>
         </table>
     </div>
 </div>
 
-<?php include 'include/footer.php'; ?>
+<?php include '../includes/footer.php'; ?>
