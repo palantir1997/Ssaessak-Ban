@@ -1,121 +1,180 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>의료 장비 관리 - MediAdmin</title>
-    <link rel="stylesheet" href="../css/style.css">
-</head>
-<body>
+<?php
+// 1. 헤더 불러오기 (경로는 파일 구조에 맞게 유지)
+include '../include/header.php';
 
-    <?php
-    // --- [Mock Data / 팀원이 SELECT 쿼리로 변경할 데이터] ---
-    $mock_equip_list = [
-        ["equip_id" => "EQ-1001", "equip_name" => "MRI 스캐너 3.0T", "category" => "영상진단기기", "purchase_date" => "2023-05-12", "current_status" => "사용 가능", "last_inspection" => "2026-05-20"],
-        ["equip_id" => "EQ-1002", "equip_name" => "이동형 X-Ray", "category" => "영상진단기기", "purchase_date" => "2024-01-15", "current_status" => "사용 중", "last_inspection" => "2026-06-01"],
-        ["equip_id" => "EQ-2001", "equip_name" => "심전도 측정기", "category" => "생체계측기기", "purchase_date" => "2022-11-30", "current_status" => "사용 가능", "last_inspection" => "2026-04-10"],
-        ["equip_id" => "EQ-3005", "equip_name" => "위내시경 장비", "category" => "진료용장비", "purchase_date" => "2025-02-10", "current_status" => "수리 중", "last_inspection" => "2026-05-28"],
-    ];
+// 2. 이 페이지 전용 DB 연결 (방금 만든 우분투 계정 사용!)
+$db_host = '192.168.0.53';
+$db_user = 'saessak_user';
+$db_pass = '1234';
+$db_name = 'saessak';
 
-    // 장비 상태에 따라 CSS 클래스를 반환하는 함수
-    function get_equip_status_color($status) {
-        switch ($status) {
-            case '사용 가능': return 'badge badge-available';
-            case '사용 중': return 'badge badge-inuse';
-            case '수리 중': return 'badge badge-repair';
-            default: return 'badge';
+// mysqli 연결 생성 (변수명을 $conn으로 고정)
+$conn = mysqli_connect($db_host, $db_user, $db_pass, $db_name);
+
+// 연결 에러 시 화면에 크게 표시
+if (!$conn) {
+    echo "<div style='background-color:#fee2e2; color:#991b1b; padding:15px; margin-bottom:20px; border-radius:8px;'>";
+    echo "<strong>[DB 연결 실패]</strong> 우분투 DB 계정 설정을 다시 확인해주세요.<br>에러 내용: " . mysqli_connect_error();
+    echo "</div>";
+} else {
+    // 연결 성공 시 한글 깨짐 방지 설정
+    mysqli_set_charset($conn, 'utf8mb4');
+
+    // 3. [INSERT] 신규 장비 폼 제출 처리
+    if ($_SERVER["REQUEST_METHOD"] == "POST" && !empty($_POST['equipment_name'])) {
+        $equipment_no = mysqli_real_escape_string($conn, $_POST['equipment_no']);
+        $equipment_name = mysqli_real_escape_string($conn, $_POST['equipment_name']);
+        $category = mysqli_real_escape_string($conn, $_POST['category']);
+        $purchase_date = mysqli_real_escape_string($conn, $_POST['purchase_date']);
+        $last_check_date = mysqli_real_escape_string($conn, $_POST['last_check_date']);
+        $status = mysqli_real_escape_string($conn, $_POST['status']);
+        $maintenance_memo = mysqli_real_escape_string($conn, $_POST['maintenance_memo']);
+        
+        $sql_insert = "INSERT INTO medical_equipments 
+                       (equipment_no, equipment_name, category, purchase_date, last_check_date, status, maintenance_memo) 
+                       VALUES 
+                       ('$equipment_no', '$equipment_name', '$category', '$purchase_date', '$last_check_date', '$status', '$maintenance_memo')";
+        
+        if (mysqli_query($conn, $sql_insert)) {
+            echo "<script>location.href='equipment_manage.php';</script>";
+            exit();
+        } else {
+            echo "<script>alert('DB 저장 오류: " . mysqli_error($conn) . "');</script>";
         }
     }
-    ?>
 
-    <main class="main-content">
-        
-        <div class="form-container">
-            <div class="form-header">
-                <h2>신규 의료 장비 등록</h2>
+    // 4. [SELECT] DB에서 장비 목록 불러오기
+    $sql_select = "SELECT * FROM medical_equipments ORDER BY created_at DESC";
+    $result_equip = mysqli_query($conn, $sql_select);
+}
+
+// 뱃지 색상 함수
+function get_equip_status_color($status) {
+    switch ($status) {
+        case '사용 가능': return 'bg-green-100 text-green-700 border-green-200';
+        case '사용 중':   return 'bg-blue-100 text-blue-700 border-blue-200';
+        case '수리 중':   return 'bg-red-100 text-red-700 border-red-200';
+        case '폐기':      return 'bg-gray-200 text-gray-500 border-gray-300';
+        default:          return 'bg-gray-100 text-gray-700 border-gray-200';
+    }
+}
+?>
+
+<div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6 mb-6">
+    <h2 class="text-lg font-bold text-gray-800 mb-4">신규 의료 장비 등록</h2>
+    <form id="equip_form" action="" method="POST">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+            <div>
+                <label class="block text-xs font-bold text-gray-500 mb-1">관리번호 (필수)</label>
+                <input type="text" id="equipment_no" name="equipment_no" required
+                    class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500"
+                    placeholder="예: EQ-1001">
             </div>
-            
-            <form id="equip_form" action="" method="POST">
-                <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
-                    <div class="form-group" style="flex: 2; margin-bottom: 0;">
-                        <label for="equip_name">장비명 (모델명)</label>
-                        <input type="text" id="equip_name" name="equip_name" class="form-control" placeholder="예: 초음파 영상 진단기">
-                    </div>
-                    <div class="form-group" style="flex: 1; margin-bottom: 0;">
-                        <label for="category">장비 분류</label>
-                        <select id="category" name="category" class="form-control">
-                            <option value="">분류 선택</option>
-                            <option value="영상진단기기">영상진단기기 (X-Ray, MRI 등)</option>
-                            <option value="생체계측기기">생체계측기기 (혈압, 심전도 등)</option>
-                            <option value="진료용장비">진료/수술용 장비</option>
-                            <option value="기타소모품">기타 의료 비품</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
-                    <div class="form-group" style="flex: 1; margin-bottom: 0;">
-                        <label for="purchase_date">구입 일자</label>
-                        <input type="date" id="purchase_date" name="purchase_date" class="form-control">
-                    </div>
-                    <div class="form-group" style="flex: 1; margin-bottom: 0;">
-                        <label for="current_status">현재 상태</label>
-                        <select id="current_status" name="current_status" class="form-control">
-                            <option value="사용 가능">사용 가능</option>
-                            <option value="사용 중">사용 중</option>
-                            <option value="수리 중">점검/수리 중</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="repair_history">수리/점검 이력 메모</label>
-                    <textarea id="repair_history" name="repair_history" class="form-control" rows="3" placeholder="특이사항이나 수리 내역을 기록하세요."></textarea>
-                </div>
-
-                <button type="submit" class="btn-submit">장비 등록</button>
-            </form>
+            <div class="sm:col-span-2">
+                <label class="block text-xs font-bold text-gray-500 mb-1">장비명 (모델명)</label>
+                <input type="text" id="equipment_name" name="equipment_name" required
+                    class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500"
+                    placeholder="예: 초음파 영상 진단기">
+            </div>
         </div>
 
-        <div class="table-container">
-            <div class="form-header" style="padding: 1.5rem 1.5rem 0 1.5rem; border-bottom: none;">
-                <h2>보유 장비 현황</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-4">
+            <div>
+                <label class="block text-xs font-bold text-gray-500 mb-1">장비 분류</label>
+                <select id="category" name="category" required
+                    class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500">
+                    <option value="">분류 선택</option>
+                    <option value="영상진단기기">영상진단기기</option>
+                    <option value="생체계측기기">생체계측기기</option>
+                    <option value="진료용장비">진료용장비</option>
+                    <option value="기타분류">기타분류</option>
+                </select>
             </div>
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>관리번호</th>
-                        <th>장비명</th>
-                        <th>분류</th>
-                        <th>최근 점검일</th>
-                        <th>상태</th>
-                        <th>관리</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($mock_equip_list as $equip): ?>
-                    <tr>
-                        <td><span style="color: #64748b; font-size: 0.875rem;"><?php echo htmlspecialchars($equip['equip_id']); ?></span></td>
-                        <td><strong><?php echo htmlspecialchars($equip['equip_name']); ?></strong></td>
-                        <td><?php echo htmlspecialchars($equip['category']); ?></td>
-                        <td><?php echo htmlspecialchars($equip['last_inspection']); ?></td>
-                        <td>
-                            <span class="<?php echo get_equip_status_color($equip['current_status']); ?>">
-                                <?php echo htmlspecialchars($equip['current_status']); ?>
-                            </span>
-                        </td>
-                        <td>
-                            <button class="action-btn">수리 기록</button>
-                            <button class="action-btn">상태 변경</button>
-                        </td>
-                    </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
+            <div>
+                <label class="block text-xs font-bold text-gray-500 mb-1">현재 상태</label>
+                <select id="status" name="status" required
+                    class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500">
+                    <option value="사용 가능">사용 가능</option>
+                    <option value="사용 중">사용 중</option>
+                    <option value="수리 중">수리 중</option>
+                    <option value="폐기">폐기</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-500 mb-1">구입 일자</label>
+                <input type="date" id="purchase_date" name="purchase_date" required
+                    class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-500 mb-1">최근 점검일</label>
+                <input type="date" id="last_check_date" name="last_check_date" required
+                    class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500">
+            </div>
         </div>
 
-    </main>
+        <div class="mb-4">
+            <label class="block text-xs font-bold text-gray-500 mb-1">수리/점검 이력 메모</label>
+            <textarea id="maintenance_memo" name="maintenance_memo" rows="3"
+                class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500 resize-none"
+                placeholder="특이사항이나 수리 내역을 기록하세요."></textarea>
+        </div>
 
-    <script src="../js/equipment.js"></script>
-</body>
-</html>
+        <button type="submit"
+            class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-sm transition-colors">
+            장비 등록
+        </button>
+    </form>
+</div>
+
+<div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+    <div class="p-5 border-b border-gray-200 bg-gray-50/50">
+        <h2 class="text-lg font-bold text-gray-800">보유 장비 현황</h2>
+    </div>
+    <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm">
+            <thead>
+                <tr class="bg-gray-50 text-gray-500 border-b border-gray-200">
+                    <th class="px-6 py-4 font-medium">관리번호</th>
+                    <th class="px-6 py-4 font-medium">장비명</th>
+                    <th class="px-6 py-4 font-medium">분류</th>
+                    <th class="px-6 py-4 font-medium">최근 점검일</th>
+                    <th class="px-6 py-4 font-medium">상태</th>
+                    <th class="px-6 py-4 font-medium">관리</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+                <?php 
+                if (isset($result_equip) && $result_equip && mysqli_num_rows($result_equip) > 0): 
+                    while($equip = mysqli_fetch_assoc($result_equip)): 
+                ?>
+                <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-6 py-4 text-gray-500 font-mono text-xs"><?php echo htmlspecialchars($equip['equipment_no']); ?></td>
+                    <td class="px-6 py-4 font-bold text-gray-800"><?php echo htmlspecialchars($equip['equipment_name']); ?></td>
+                    <td class="px-6 py-4 text-gray-600"><?php echo htmlspecialchars($equip['category']); ?></td>
+                    <td class="px-6 py-4 text-gray-600"><?php echo htmlspecialchars($equip['last_check_date']); ?></td>
+                    <td class="px-6 py-4">
+                        <span class="px-3 py-1 rounded-full text-xs font-bold border <?php echo get_equip_status_color($equip['status']); ?>">
+                            <?php echo htmlspecialchars($equip['status']); ?>
+                        </span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="flex gap-2">
+                            <button class="px-3 py-1 text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors">수리 기록</button>
+                            <button class="px-3 py-1 text-xs font-medium bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg transition-colors">상태 변경</button>
+                        </div>
+                    </td>
+                </tr>
+                <?php 
+                    endwhile; 
+                else: 
+                ?>
+                <tr>
+                    <td colspan="6" class="px-6 py-8 text-center text-gray-500">등록된 의료 장비가 없습니다.</td>
+                </tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<?php include '../includes/footer.php'; ?>
