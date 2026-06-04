@@ -1,9 +1,15 @@
 <?php
-mysqli_report(MYSQLI_REPORT_OFF);
-$conn = @mysqli_connect('localhost', 'root', '', 'saessak');
+// admin/include/db.php
+$db_host = 'localhost'; 
+$db_user = 'root';
+$db_pass = ''; // MySQL 비밀번호가 있다면 여기에 입력하세요
+$db_name = 'saessak';
+
+$conn = mysqli_connect($db_host, $db_user, $db_pass, $db_name);
+
 if (!$conn) {
-    echo "<script>alert('DB 연결 실패: XAMPP에서 MySQL을 Start 했는지 확인해 주세요.'); history.back();</script>";
-    exit();
+    die("DB 연결 실패: " . mysqli_connect_error());
 }
+
 mysqli_set_charset($conn, 'utf8mb4');
 ?>
