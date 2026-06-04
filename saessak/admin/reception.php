@@ -2,29 +2,36 @@
 include 'include/header.php';
 
 // 1. 디버깅 및 에러 출력 강제 활성화
+/*
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+*/
+
 
 try {
-    // =================================================================
-    // [설정 완료] 제공해주신 우분투 외부 접속용 계정 정보 반영
-    // =================================================================
-    $db_host = '172.16.11.222'; 
-    $db_user = 'root';   
+    $db_host = '192.168.45.213'; 
+    $db_user = 'hyejin';
     $db_pass = ''; 
     $db_name = 'saessak';
     $db_port = 3306; 
 
-    // 외부 우분투 서버와 직접 통신 시작
     $conn = mysqli_connect($db_host, $db_user, $db_pass, $db_name, $db_port);
+
+    // ✅ 연결 성공 여부 확인 추가!
+    if (!$conn) {
+        die("<div class='p-6 bg-red-100 text-red-700 rounded-xl m-6'>
+                <h1 class='text-xl font-bold mb-2'>🚨 우분투 DB 서버 연결 실패</h1>
+                <p>PHP 웹서버가 우분투 가상머신({$db_host}) 접속에 실패했습니다.</p>
+                <p class='mt-4 font-mono text-sm bg-white p-3 rounded border border-red-200'>에러 내용: " . mysqli_connect_error() . "</p>
+             </div>");
+    }
+
     mysqli_set_charset($conn, 'utf8mb4');
 } catch (Exception $e) {
-    // 만약 주소가 맞는데도 연결 거부가 뜨면, 우분투 내 mysqld.cnf의 bind-address 설정을 확인해야 합니다.
     die("<div class='p-6 bg-red-100 text-red-700 rounded-xl m-6'>
             <h1 class='text-xl font-bold mb-2'>🚨 우분투 DB 서버 연결 실패</h1>
-            <p>PHP 웹서버가 우분투 가상머신({$db_host}) 접속에 실패했습니다.</p>
-            <p class='mt-4 font-mono text-sm bg-white p-3 rounded border border-red-200'>에러 내용: " . $e->getMessage() . "</p>
+            <p>에러 내용: " . $e->getMessage() . "</p>
          </div>");
 }
 
