@@ -10,18 +10,9 @@ mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
 
 try {
-<<<<<<< HEAD
-    $db_host = '192.168.45.213'; 
-    $db_user = 'hyejin';
+    $db_host = '172.16.11.222'; 
+    $db_user = 'root';
     $db_pass = ''; 
-=======
-    // =================================================================
-    // [설정 완료] 제공해주신 우분투 외부 접속용 계정 정보 반영
-    // =================================================================
-    $db_host = '192.168.0.53'; 
-    $db_user = 'saessak_user';   
-    $db_pass = '1234'; 
->>>>>>> 5d65c26857aa6cdfbbf0e3fe790016aa294a6b72
     $db_name = 'saessak';
     $db_port = 3306; 
 
