@@ -15,6 +15,12 @@ $isAdmin = (isset($_SESSION['role']) && $_SESSION['role'] === 'admin');
     <title>SaessakAdmin - 병원 관리자 페이지</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    lucide.createIcons();
+});
+</script>
+
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans h-screen flex overflow-hidden">
 
