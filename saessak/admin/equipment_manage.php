@@ -1,10 +1,10 @@
 <?php
-include 'include/header.php';
-include 'includes/db.php'; 
+// 한 칸 위로(../) 올라가서 includes 폴더의 파일들을 불러옵니다.
+include '../includes/header.php';
+include '../includes/db.php'; 
 
 // 1. [INSERT] 신규 장비 폼 제출 처리
 if ($_SERVER["REQUEST_METHOD"] == "POST" && !empty($_POST['equipment_name'])) {
-    // 보안: 입력값 필터링 (SQL 인젝션 방지)
     $equipment_no = $conn->real_escape_string($_POST['equipment_no']);
     $equipment_name = $conn->real_escape_string($_POST['equipment_name']);
     $category = $conn->real_escape_string($_POST['category']);
@@ -13,7 +13,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !empty($_POST['equipment_name'])) {
     $status = $conn->real_escape_string($_POST['status']);
     $maintenance_memo = $conn->real_escape_string($_POST['maintenance_memo']);
     
-    // medical_equipments 테이블 구조에 맞춘 INSERT 쿼리
     $sql_insert = "INSERT INTO medical_equipments 
                    (equipment_no, equipment_name, category, purchase_date, last_check_date, status, maintenance_memo) 
                    VALUES 
@@ -27,11 +26,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !empty($_POST['equipment_name'])) {
     }
 }
 
-// 2. [SELECT] DB에서 장비 목록 불러오기 (최신 등록순)
+// 2. [SELECT] DB에서 장비 목록 불러오기
 $sql_select = "SELECT * FROM medical_equipments ORDER BY created_at DESC";
 $result_equip = $conn->query($sql_select);
 
-// 뱃지 색상 함수 (폐기 상태 추가)
 function get_equip_status_color($status) {
     switch ($status) {
         case '사용 가능': return 'bg-green-100 text-green-700 border-green-200';
@@ -161,4 +159,7 @@ function get_equip_status_color($status) {
     </div>
 </div>
 
-<?php include 'includes/footer.php'; ?>
+<?php 
+// 푸터 경로도 완벽하게 수정
+include '../includes/footer.php'; 
+?>
