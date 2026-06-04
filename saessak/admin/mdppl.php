@@ -1,6 +1,6 @@
 <?php
 // 1. 헤더 불러오기 (CSS/JS 연동을 위해 상대경로 '../includes/' 사용)
-include '../includes/header.php';
+include '../include/header.php';
 
 // ==========================================
 // 2. [독립형 DB 연결] db.php 우회, 타임아웃 방지
