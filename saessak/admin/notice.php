@@ -1,25 +1,11 @@
 <?php
-include 'include/header.php';
-include 'include/db.php'; // DB 연결
+// DB 연결 (이미 설정된 파일이 있다면 include 또는 require 사용)
+// require_once 'includes/db.php';
 
-// 1. 공지사항 등록 처리
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['title'])) {
-    $title = mysqli_real_escape_string($conn, $_POST['title']);
-    $category = mysqli_real_escape_string($conn, $_POST['category']);
-    $content = mysqli_real_escape_string($conn, $_POST['content']);
-    $important = isset($_POST['important']) ? 1 : 0;
-
-    $insert_sql = "INSERT INTO notices (title, category, content, important) VALUES ('$title', '$category', '$content', '$important')";
-    mysqli_query($conn, $insert_sql);
-    
-    echo "<script>location.replace('notice.php');</script>";
-    exit;
-}
-
-// 2. 공지사항 목록 조회
-$sql = "SELECT * FROM notices ORDER BY id DESC";
-$result = mysqli_query($conn, $sql);
-$notices = mysqli_fetch_all($result, MYSQLI_ASSOC);
+// 데이터 조회 로직 (예시)
+// $query = "SELECT * FROM notices ORDER BY id DESC";
+// $result = mysqli_query($conn, $query);
+// $notices = mysqli_fetch_all($result, MYSQLI_ASSOC);
 
 function get_category_color($category) {
     switch ($category) {
@@ -39,13 +25,13 @@ function get_category_color($category) {
             <div class="sm:col-span-2">
                 <label class="block text-xs font-bold text-gray-500 mb-1">제목</label>
                 <input type="text" name="title" required
-                    class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500"
+                    class="w-full px-4 py-2.5 border border-gray-200 rounded-lg"
                     placeholder="공지사항 제목을 입력하세요">
             </div>
             <div>
                 <label class="block text-xs font-bold text-gray-500 mb-1">카테고리</label>
                 <select name="category" required
-                    class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500">
+                    class="w-full px-4 py-2.5 border border-gray-200 rounded-lg">
                     <option value="">카테고리 선택</option>
                     <option value="공지">공지</option>
                     <option value="휴진">휴진</option>
@@ -57,51 +43,10 @@ function get_category_color($category) {
         <div class="mb-4">
             <label class="block text-xs font-bold text-gray-500 mb-1">내용</label>
             <textarea name="content" rows="4" required
-                class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500 resize-none"
-                placeholder="공지사항 내용을 입력하세요."></textarea>
+                class="w-full px-4 py-2.5 border border-gray-200 rounded-lg"></textarea>
         </div>
-        <div class="flex items-center gap-3 mb-4">
-            <input type="checkbox" id="important" name="important" class="rounded text-blue-600">
-            <label for="important" class="text-sm text-gray-600 cursor-pointer">중요 공지로 설정</label>
-        </div>
-        <button type="submit"
-            class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-sm transition-colors">
-            공지 등록
+        <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition">
+            등록하기
         </button>
     </form>
 </div>
-
-<div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-    <div class="p-5 border-b border-gray-200 bg-gray-50/50">
-        <h2 class="text-lg font-bold text-gray-800">공지사항 목록</h2>
-    </div>
-    <div class="overflow-x-auto">
-        <table class="w-full text-left text-sm">
-            <thead>
-                <tr class="bg-gray-50 text-gray-500 border-b border-gray-200">
-                    <th class="px-6 py-4 font-medium">번호</th>
-                    <th class="px-6 py-4 font-medium">카테고리</th>
-                    <th class="px-6 py-4 font-medium">제목</th>
-                    <th class="px-6 py-4 font-medium">작성자</th>
-                    <th class="px-6 py-4 font-medium">작성일</th>
-                    <th class="px-6 py-4 font-medium">중요</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-200">
-                <?php foreach ($notices as $notice): ?>
-                <tr class="hover:bg-gray-50 transition-colors">
-                    <td class="px-6 py-4 text-gray-400 font-mono text-xs"><?php echo $notice['id']; ?></td>
-                    <td class="px-6 py-4">
-                        <span class="px-3 py-1 rounded-full text-xs font-bold border <?php echo get_category_color($notice['category']); ?>">
-                            <?php echo htmlspecialchars($notice['category']); ?>
-                        </span>
-                    </td>
-                    <td class="px-6 py-4 font-medium text-gray-800">
-                        <?php if ($notice['important']): ?> <span class="text-red-500 mr-1">★</span> <?php endif; ?>
-                        <?php echo htmlspecialchars($notice['title']); ?>
-                    </td>
-                    <td class="px-6 py-4 text-gray-600"><?php echo htmlspecialchars($notice['author']); ?></td>
-                    <td class="px-6 py-4 text-gray-500"><?php echo htmlspecialchars($notice['created_at']); ?></td>
-                    <td class="px-6 py-4">
-                        <?php if ($notice['important']): ?>
-                            <span class="px-3 py-1 rounded-full text-xs font-bold border bg-red-100 text-red
