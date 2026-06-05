@@ -1,10 +1,12 @@
 <?php
 include 'include/header.php';
 
-$db_host = '175.210.161.42'; 
-$db_user = 'DH';
-$db_pass = '1234'; // MySQL 비밀번호가 있다면 여기에 입력하세요
-$db_name = 'saessak';      
+$db_host = '172.16.11.222'; 
+$db_user = 'root';
+$db_pass = ''; // MySQL 비밀번호가 있다면 여기에 입력하세요
+$db_name = 'saessak';
+$db_port = 3306;     
+
 
 $conn = mysqli_connect($db_host, $db_user, $db_pass, $db_name, $db_port);
 if (!$conn) {

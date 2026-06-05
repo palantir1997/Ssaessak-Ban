@@ -9,10 +9,12 @@ include './include/header.php';
 <?php
 
 // 2. 이 페이지 전용 DB 연결 (방금 만든 우분투 계정 사용!)
-$db_host = '175.210.161.42'; 
-$db_user = 'DH';
-$db_pass = '1234'; // MySQL 비밀번호가 있다면 여기에 입력하세요
+
+$db_host = '172.16.11.222'; 
+$db_user = 'root';
+$db_pass = ''; // MySQL 비밀번호가 있다면 여기에 입력하세요
 $db_name = 'saessak';
+$db_port = 3306;
 
 // mysqli 연결 생성 (변수명을 $conn으로 고정)
 $conn = mysqli_connect($db_host, $db_user, $db_pass, $db_name, $db_port);
