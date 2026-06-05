@@ -1,106 +1,150 @@
 <?php
 include 'include/header.php';
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    die("<script>alert('접근 권한이 없습니다.'); history.back();</script>");
-}
 
-$logs = [
-    ["time" => "2026-06-01 17:00", "type" => "무차별 대입 공격 (Brute Force)", "ip" => "192.168.1.105", "risk" => "고위험", "status" => "처리대기"],
-    ["time" => "2026-06-01 15:42", "type" => "SQL 인젝션 시도",               "ip" => "10.0.0.88",    "risk" => "고위험", "status" => "처리대기"],
-    ["time" => "2026-06-01 13:20", "type" => "비정상 포트 접근",               "ip" => "172.16.0.23",  "risk" => "중위험", "status" => "처리완료"],
-    ["time" => "2026-06-01 11:05", "type" => "권한 없는 파일 접근 시도",        "ip" => "192.168.1.77", "risk" => "중위험", "status" => "처리완료"],
-    ["time" => "2026-06-01 09:30", "type" => "외부 IP 반복 접속",              "ip" => "203.0.113.42", "risk" => "저위험", "status" => "처리완료"],
-    ["time" => "2026-05-31 22:15", "type" => "세션 하이재킹 시도",              "ip" => "192.168.2.11", "risk" => "고위험", "status" => "처리완료"],
-];
+// 1. 데이터베이스 연결
+try {
+    $db_host = '172.16.11.222'; 
+    $db_user = 'root';
+    $db_pass = ''; 
+    $db_name = 'saessak';
+    $db_port = 3306; 
 
-function getRiskColor($risk) {
-    switch ($risk) {
-        case '고위험': return 'bg-red-100 text-red-700 border-red-200';
-        case '중위험': return 'bg-yellow-100 text-yellow-700 border-yellow-200';
-        case '저위험': return 'bg-blue-100 text-blue-700 border-blue-200';
-        default: return 'bg-gray-100 text-gray-600';
+    $conn = mysqli_connect($db_host, $db_user, $db_pass, $db_name, $db_port);
+    if (!$conn) {
+        die("<div class='p-6 bg-red-100 text-red-700 rounded-xl m-6'><h1>🚨 DB 연결 실패</h1></div>");
     }
+    mysqli_set_charset($conn, 'utf8mb4');
+} catch (Exception $e) {
+    die("에러: " . $e->getMessage());
 }
 
-function getStatusColor($status) {
-    return $status === '처리대기'
-        ? 'bg-red-50 text-red-600 border-red-200'
-        : 'bg-green-50 text-green-600 border-green-200';
+// 2. 테이블 체크 및 보안 자동 탐지 로직
+if (isset($conn)) {
+    // login_attempts 테이블이 없으면 생성
+    mysqli_query($conn, "
+        CREATE TABLE IF NOT EXISTS login_attempts (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            ip_address VARCHAR(45),
+            attempt_time DATETIME DEFAULT CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB;
+    ");
+
+    // 1분 이내에 3번 이상 실패한 IP를 자동으로 침입 탐지 로그로 이전 (자동 탐지 엔진)
+    mysqli_query($conn, "
+        INSERT INTO intrusion_logs (detection_time, attack_type, source_ip, country, user_id, risk_level, status)
+        SELECT NOW(), 'Brute Force Attack (로그인 실패)', ip_address, 'Korea', 'Unknown', '고위험', '처리대기'
+        FROM login_attempts
+        WHERE attempt_time > NOW() - INTERVAL 1 MINUTE
+        GROUP BY ip_address
+        HAVING COUNT(*) >= 3
+        AND ip_address NOT IN (SELECT source_ip FROM intrusion_logs WHERE detection_time > NOW() - INTERVAL 1 MINUTE)
+    ");
+}
+// 3. 관리자 위치 정보 추적 (IP API)
+$admin_ip = ($_SERVER['REMOTE_ADDR'] === '::1' || $_SERVER['REMOTE_ADDR'] === '127.0.0.1') ? '175.114.1.1' : $_SERVER['REMOTE_ADDR'];
+$ip_data = @file_get_contents("http://ip-api.com/json/{$admin_ip}");
+$ip_info = json_decode($ip_data, true);
+$location = ($ip_info && $ip_info['status'] == 'success') ? "{$ip_info['country']} - {$ip_info['city']}" : "위치 정보 없음";
+
+// 데이터 조회
+$stats = ['고위험' => 0, '중위험' => 0, '저위험' => 0];
+$stat_query = mysqli_query($conn, "SELECT risk_level, COUNT(*) as cnt FROM intrusion_logs GROUP BY risk_level");
+while($row = mysqli_fetch_assoc($stat_query)) { $stats[$row['risk_level']] = $row['cnt']; }
+
+// security_logs.php 상단 데이터 조회 부분
+$result = mysqli_query($conn, "SELECT * FROM intrusion_logs ORDER BY detection_time DESC LIMIT 100");
+$logs = [];
+while($row = mysqli_fetch_assoc($result)){ 
+    $logs[] = $row; 
 }
 ?>
 
-<div class="mb-6 flex items-center justify-between">
-    <div>
-        <h1 class="text-2xl font-bold text-gray-800">침입 탐지 로그</h1>
-        <p class="text-sm text-gray-500 mt-1">시스템 침입 시도 및 보안 이벤트 기록</p>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+    <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-lg text-gray-200">
+        <h3 class="font-bold text-blue-400 mb-2 flex items-center gap-2">
+            <i data-lucide="shield-check"></i> 실시간 보안 관제 센터(SOC)
+        </h3>
+        <p class="text-sm">현재 접속 계정: <span class="text-white font-bold"><?php echo $_SESSION['user_id']; ?></span></p>
+        <p class="text-xs text-gray-400">시스템 보안 레벨: Lv.5</p>
     </div>
-    <button onclick="window.print()" class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 shadow-sm">
-        <i data-lucide="download" class="w-4 h-4"></i> 내보내기
-    </button>
+    <div class="p-6 bg-gray-800 rounded-xl border border-blue-500/30 shadow-lg">
+        <p class="text-blue-300 text-sm font-bold mb-1">📍 관리자 실시간 위치 기반 추적</p>
+        <p class="text-white text-lg font-mono"><?php echo $location; ?></p>
+        <div class="h-2 w-full bg-gray-700 rounded-full mt-2 overflow-hidden">
+            <div class="h-full bg-blue-500 animate-pulse" style="width: 100%"></div>
+        </div>
+    </div>
 </div>
 
-<!-- 요약 카드 -->
 <div class="grid grid-cols-3 gap-6 mb-6">
+    <?php foreach(['고위험'=>'alert-octagon', '중위험'=>'alert-triangle', '저위험'=>'info'] as $level => $icon): ?>
     <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4">
-        <div class="p-3 bg-red-100 text-red-600 rounded-lg"><i data-lucide="alert-octagon" class="w-6 h-6"></i></div>
+        <div class="p-3 <?php echo ($level=='고위험')?'bg-red-100 text-red-600':(($level=='중위험')?'bg-yellow-100 text-yellow-600':'bg-blue-100 text-blue-600'); ?> rounded-lg">
+            <i data-lucide="<?php echo $icon; ?>" class="w-6 h-6"></i>
+        </div>
         <div>
-            <p class="text-xs text-gray-500">고위험</p>
-            <p class="text-xl font-bold text-red-600">3건</p>
+            <p class="text-xs text-gray-500"><?php echo $level; ?></p>
+            <p class="text-xl font-bold"><?php echo $stats[$level] ?? 0; ?>건</p>
         </div>
     </div>
-    <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4">
-        <div class="p-3 bg-yellow-100 text-yellow-600 rounded-lg"><i data-lucide="alert-triangle" class="w-6 h-6"></i></div>
-        <div>
-            <p class="text-xs text-gray-500">중위험</p>
-            <p class="text-xl font-bold text-yellow-600">2건</p>
+    <?php endforeach; ?>
+</div>
+
+<div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+    <table class="w-full text-left">
+        <thead class="bg-gray-50 text-gray-500 text-sm">
+            <tr>
+                <th class="px-6 py-4">탐지 시간</th>
+                <th class="px-6 py-4">공격 유형</th>
+                <th class="px-6 py-4">국가</th>
+                <th class="px-6 py-4">소스 IP</th>
+                <th class="px-6 py-4">계정</th>
+                <th class="px-6 py-4">위험도</th>
+                <th class="px-6 py-4">분석</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200 text-sm">
+            <?php foreach ($logs as $log): ?>
+            <tr>
+                <td class="px-6 py-4"><?php echo $log['detection_time']; ?></td>
+                <td class="px-6 py-4 font-bold"><?php echo $log['attack_type']; ?></td>
+                <td class="px-6 py-4">🌍 <?php echo $log['country']; ?></td>
+                <td class="px-6 py-4 text-gray-500"><?php echo $log['source_ip']; ?></td>
+                <td class="px-6 py-4 text-blue-600"><?php echo $log['user_id']; ?></td>
+                <td class="px-6 py-4"><span class="px-3 py-1 rounded-full text-xs font-bold bg-gray-100"><?php echo $log['risk_level']; ?></span></td>
+                <td class="px-6 py-4">
+                    <button onclick="openDetailModal('<?php echo $log['attack_type']; ?>', '<?php echo $log['source_ip']; ?>', '<?php echo $log['country']; ?>')" 
+                            class="bg-blue-600 text-white px-3 py-1 rounded text-xs hover:bg-blue-700">분석</button>
+                </td>
+            </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
+</div>
+
+<div id="detailModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white p-6 rounded-lg w-1/3 shadow-2xl">
+        <h2 class="text-xl font-bold mb-4 text-gray-800" id="modalTitle">공격 상세 분석</h2>
+        <div class="space-y-3 text-sm">
+            <p id="modalIp" class="text-gray-600"></p>
+            <p id="modalCountry" class="text-gray-600"></p>
+            <div class="p-4 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-700">
+                ⚠️ 차단 권고: 해당 IP를 방화벽 블랙리스트에 추가하십시오.
+            </div>
         </div>
-    </div>
-    <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4">
-        <div class="p-3 bg-blue-100 text-blue-600 rounded-lg"><i data-lucide="info" class="w-6 h-6"></i></div>
-        <div>
-            <p class="text-xs text-gray-500">저위험</p>
-            <p class="text-xl font-bold text-blue-600">1건</p>
-        </div>
+        <button onclick="document.getElementById('detailModal').classList.add('hidden')" 
+                class="mt-6 bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">닫기</button>
     </div>
 </div>
 
-<!-- 로그 테이블 -->
-<div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-    <div class="p-5 border-b border-gray-200 bg-gray-50/50">
-        <h2 class="text-lg font-bold text-gray-800">전체 로그</h2>
-    </div>
-    <div class="overflow-x-auto">
-        <table class="w-full text-left">
-            <thead>
-                <tr class="bg-gray-50 text-gray-500 text-sm border-b border-gray-200">
-                    <th class="px-6 py-4 font-medium">탐지 시간</th>
-                    <th class="px-6 py-4 font-medium">공격 유형</th>
-                    <th class="px-6 py-4 font-medium">출처 IP</th>
-                    <th class="px-6 py-4 font-medium">위험도</th>
-                    <th class="px-6 py-4 font-medium">처리 상태</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-200 text-sm">
-                <?php foreach ($logs as $log): ?>
-                <tr class="hover:bg-gray-50 transition-colors">
-                    <td class="px-6 py-4 font-medium text-gray-700"><?php echo $log['time']; ?></td>
-                    <td class="px-6 py-4 text-gray-800"><?php echo $log['type']; ?></td>
-                    <td class="px-6 py-4 font-mono text-gray-500"><?php echo $log['ip']; ?></td>
-                    <td class="px-6 py-4">
-                        <span class="px-3 py-1 rounded-full text-xs font-bold border <?php echo getRiskColor($log['risk']); ?>">
-                            <?php echo $log['risk']; ?>
-                        </span>
-                    </td>
-                    <td class="px-6 py-4">
-                        <span class="px-3 py-1 rounded-full text-xs font-bold border <?php echo getStatusColor($log['status']); ?>">
-                            <?php echo $log['status']; ?>
-                        </span>
-                    </td>
-                </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
-    </div>
-</div>
+<script>
+function openDetailModal(type, ip, country) {
+    document.getElementById('modalTitle').innerText = "분석: " + type;
+    document.getElementById('modalIp').innerText = "출처 IP: " + ip;
+    document.getElementById('modalCountry').innerText = "발생 국가: " + country;
+    document.getElementById('detailModal').classList.remove('hidden');
+}
+</script>
 
 <?php include 'include/footer.php'; ?>
