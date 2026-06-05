@@ -1,5 +1,4 @@
 <?php
-// 기존에 사용하시던 헤더 인클루드 경로 그대로 유지합니다.
 include 'include/header.php';
 
 $mock_charts = [
@@ -129,11 +128,16 @@ if ($search_name !== '' || $search_dept !== '' || $search_date !== '') {
                         <td class="px-6 py-4">
                             <div class="flex gap-2">
                                 <button type="button" 
-                                onclick="openCertificate('<?php echo $chart['chart_id']; ?>', '<?php echo htmlspecialchars($chart['name']); ?>', '<?php echo $chart['date']; ?>', '<?php echo htmlspecialchars($chart['diagnosis']); ?>', '<?php echo htmlspecialchars($chart['prescription']); ?>', '<?php echo htmlspecialchars($chart['note']); ?>')" 
+                                onclick="openCertificate('<?php echo $chart['chart_id']; ?>', '<?php echo htmlspecialchars($chart['name']); ?>', '<?php echo htmlspecialchars($chart['doctor']); ?>', '<?php echo $chart['date']; ?>', '<?php echo htmlspecialchars($chart['diagnosis']); ?>', '<?php echo htmlspecialchars($chart['prescription']); ?>', '<?php echo htmlspecialchars($chart['note']); ?>')"
                                 class="px-3 py-1 text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors">
                                  상세
                                 </button>
-                                <button class="px-3 py-1 text-xs font-medium bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg transition-colors">수정</button>
+
+                                <button type="button"
+                                onclick="openEditModal('<?php echo $chart['chart_id']; ?>', '<?php echo htmlspecialchars($chart['name']); ?>', '<?php echo htmlspecialchars($chart['dept']); ?>', '<?php echo htmlspecialchars($chart['doctor']); ?>', '<?php echo $chart['date']; ?>', '<?php echo htmlspecialchars($chart['diagnosis']); ?>', '<?php echo htmlspecialchars($chart['prescription']); ?>', '<?php echo htmlspecialchars($chart['note']); ?>')"
+                                class="px-3 py-1 text-xs font-medium bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg transition-colors">
+                                    수정
+                                </button>
                             </div>
                         </td>
                     </tr>
@@ -197,8 +201,8 @@ if ($search_name !== '' || $search_dept !== '' || $search_date !== '') {
 
             <div class="flex justify-end items-center gap-4 border-t border-gray-200 pt-6">
                 <div class="text-right">
-                    <p class="text-sm text-gray-500">의료기관 명칭 : 새싹종합병원</p>
-                    <p class="text-base font-bold text-gray-800">담당의사 : 홍길동 (인)</p>
+                    <p class="text-sm text-gray-500">의료기관 : 새싹종합병원</p>
+                    <p class="text-base font-bold text-gray-800">담당의사 : <span id="cert_doctor">--</span> (인)</p>
                 </div>
                 <div class="w-14 h-14 border border-red-400 rounded-full flex items-center justify-center text-red-500 text-xs font-bold border-dashed transform rotate-12">
                     새싹병원
@@ -216,11 +220,74 @@ if ($search_name !== '' || $search_dept !== '' || $search_date !== '') {
     </div>
 </div>
 
+<div id="editChartModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black bg-opacity-60 overflow-y-auto py-10">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-xl overflow-hidden border border-gray-300 my-auto">
+        
+        <div class="px-6 py-4 bg-blue-600 text-white flex justify-between items-center">
+            <h3 class="text-lg font-bold tracking-wide">✏️ 진료기록 수정 (정정)</h3>
+            <button type="button" onclick="closeEditModal()" class="text-white hover:text-gray-200 text-2xl font-semibold">&times;</button>
+        </div>
+
+        <form id="editChartForm" method="POST" action="chart_update_mock.php" class="p-6 space-y-4">
+            
+            <div class="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg border border-gray-100">
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 mb-1">차트 번호</label>
+                    <input type="text" id="edit_id" name="chart_id" readonly
+                        class="w-full px-3 py-2 bg-gray-100 border border-gray-200 rounded-lg text-sm text-gray-500 cursor-not-allowed focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 mb-1">환자 성명</label>
+                    <input type="text" id="edit_name" readonly
+                        class="w-full px-3 py-2 bg-gray-100 border border-gray-200 rounded-lg text-sm text-gray-500 cursor-not-allowed focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 mb-1">진료 일자</label>
+                    <input type="text" id="edit_date" readonly
+                        class="w-full px-3 py-2 bg-gray-100 border border-gray-200 rounded-lg text-sm text-gray-500 cursor-not-allowed focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 mb-1">담당 의사 (진료과)</label>
+                    <input type="text" id="edit_doctor_dept" readonly
+                        class="w-full px-3 py-2 bg-gray-100 border border-gray-200 rounded-lg text-sm text-gray-500 cursor-not-allowed focus:outline-none">
+                </div>
+            </div>
+
+            <hr class="border-gray-200">
+
+            <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1">진단명 <span class="text-red-500">*</span></label>
+                <input type="text" id="edit_diagnosis" name="diagnosis" required
+                    class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1">■ 처방 내역 및 조제 정보</label>
+                <textarea id="edit_prescription" name="prescription" rows="3"
+                    class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500 font-mono text-xs"></textarea>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1">■ 의사 소견 및 비고</label>
+                <textarea id="edit_note" name="note" rows="4"
+                    class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500 text-xs"></textarea>
+            </div>
+
+            <div class="flex justify-end gap-2 pt-2">
+                <button type="button" onclick="closeEditModal()" 
+                    class="px-4 py-2 text-sm font-medium bg-white hover:bg-gray-100 text-gray-700 border border-gray-200 rounded-lg transition-colors">취소</button>
+                <button type="submit" onclick="" 
+                    class="px-4 py-2 text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">수정 완료</button>
+            </div>
+        </form>
+
+    </div>
+</div>
+
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 
 <script src="../js/chart.js"></script>
 
 <?php 
-// 기존에 쓰시던 푸터 경로 그대로 유지합니다.
 include 'include/footer.php'; 
 ?>
