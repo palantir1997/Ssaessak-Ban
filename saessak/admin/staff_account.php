@@ -1,6 +1,9 @@
 <?php
 include 'include/header.php';
 
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 // ==========================================
 // 1. DB 연결
 // ==========================================
@@ -41,6 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $work_schedule = mysqli_real_escape_string($conn, trim($_POST['work_schedule'] ?? ''));
     $hire_date = date('Y-m-d');
     $phone = '010-0000-0000'; // 기본값 (나중에 수정 가능)
+}
 
     if (!empty($name) && !empty($position) && !empty($dept_name) && !empty($work_schedule)) {
         // medical_staffs 테이블에 INSERT
@@ -67,15 +71,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     )
 ";
 
-        if (mysqli_query($conn, $insert_query)) {
-            echo "<script>alert('의료진이 등록되었습니다!'); location.href='staff_account.php';</script>";
+        $result_insert = mysqli_query($conn, $insert_query);
+
+        if ($result_insert) {
+            echo "등록 성공";
             exit;
         } else {
-            echo "<script>alert('등록 오류: " . mysqli_error($conn) . "');</script>";
+            die(mysqli_error($conn));
         }
-    } else {
-        echo "<script>alert('필수 입력 항목을 모두 채워주세요.');</script>";
-    }
 }
 
 
