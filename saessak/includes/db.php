@@ -1,4 +1,17 @@
 <?php
+<<<<<<< HEAD
+// DB 연결 설정
+$host = 'localhost';
+$user = 'web_user';
+$pass = 'password123';
+$dbname = 'saessak';
+
+$conn = mysqli_connect($host, $user, $pass, $dbname);
+
+// 연결 오류 확인
+if (!$conn) {
+    die("DB 연결 실패: " . mysqli_connect_error());
+=======
 // 데이터베이스 연결 설정
 $db_host = '172.16.11.222';  // 우분투 VM 주소 (또는 localhost)
 $db_user = 'root';
@@ -15,6 +28,7 @@ if (!$conn) {
         <p>MySQL 서버가 실행 중인지 확인해주세요.</p>
         <p><code>{$db_host}:{$db_port}</code> 접속 확인 필요</p>
     </div>");
+>>>>>>> 9446ed218bcc73f47d1dbba11e1c24aa7abd6690
 }
 
 mysqli_set_charset($conn, 'utf8mb4');
