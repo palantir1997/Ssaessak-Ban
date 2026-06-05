@@ -1,4 +1,5 @@
 <?php
+// 기존에 사용하시던 헤더 인클루드 경로 그대로 유지합니다.
 include 'include/header.php';
 
 $mock_charts = [
@@ -8,41 +9,46 @@ $mock_charts = [
     ["chart_id" => "CH-1004", "name" => "최동훈", "age" => 61, "dept" => "내과", "doctor" => "박건우", "date" => "2026-06-01", "diagnosis" => "당뇨 2형", "prescription" => "메트포르민 500mg", "note" => "혈당 186, 식이요법 안내"],
 ];
 
-// --- [검색 및 필터링 로직 추가] ---
-// 사용자가 GET 방식으로 전달한 검색 키워드를 받아옵니다. (양끝 공백 제거)
 $search_name = isset($_GET['search_name']) ? trim($_GET['search_name']) : '';
 $search_dept = isset($_GET['search_dept']) ? trim($_GET['search_dept']) : '';
 $search_date = isset($_GET['search_date']) ? trim($_GET['search_date']) : '';
 
-// 테이블에 최종적으로 표시할 결과 배열 (기본값은 전체 데이터)
 $filtered_charts = $mock_charts;
 $error_message = "";
 
-// 검색 버튼이 눌렸거나, 변수 중 하나라도 값이 존재하는 경우 (검색 시도)
 if ($search_name !== '' || $search_dept !== '' || $search_date !== '') {
-    
-    // 조건: 세 가지 입력칸이 '모두' 필수입니다. 하나라도 비어있으면 경고를 띄웁니다.
     if ($search_name === '' || $search_dept === '' || $search_date === '') {
         $error_message = "환자명, 진료과, 진료일을 모두 입력하셔야 검색이 가능합니다.";
-        // 필수 조건 미달 시 빈 목록을 보여주고 싶다면 아래 주석을 해제하세요.
-        // $filtered_charts = []; 
     } else {
-        // 세 칸이 모두 입력되었을 때만 필터링 수행
         $filtered_charts = array_filter($mock_charts, function($chart) use ($search_name, $search_dept, $search_date) {
-            // 환자명 포함 여부 (대소문자 구분 없이 비교하기 위해 가공 가능, 여기선 단순 포함 검사)
             $name_match = (strpos($chart['name'], $search_name) !== false);
-            // 진료과 일치 여부
             $dept_match = ($chart['dept'] === $search_dept);
-            // 진료일 일치 여부
             $date_match = ($chart['date'] === $search_date);
-            
-            // 세 조건이 모두 충족(AND)되어야 true를 반환하여 결과에 포함시킵니다.
             return $name_match && $dept_match && $date_match;
         });
     }
 }
-// ----------------------------------
 ?>
+
+<style>
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    #printArea, #printArea * {
+        visibility: visible;
+    }
+    #printArea {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+    }
+    .no-print {
+        display: none !important;
+    }
+}
+</style>
 
 <?php if (!empty($error_message)): ?>
 <div class="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 text-sm font-medium rounded-lg">
@@ -122,7 +128,11 @@ if ($search_name !== '' || $search_dept !== '' || $search_date !== '') {
                         <td class="px-6 py-4 text-gray-500 text-xs max-w-xs truncate"><?php echo htmlspecialchars($chart['note']); ?></td>
                         <td class="px-6 py-4">
                             <div class="flex gap-2">
-                                <button class="px-3 py-1 text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors">상세</button>
+                                <button type="button" 
+                                onclick="openCertificate('<?php echo $chart['chart_id']; ?>', '<?php echo htmlspecialchars($chart['name']); ?>', '<?php echo $chart['date']; ?>', '<?php echo htmlspecialchars($chart['diagnosis']); ?>', '<?php echo htmlspecialchars($chart['prescription']); ?>', '<?php echo htmlspecialchars($chart['note']); ?>')" 
+                                class="px-3 py-1 text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors">
+                                 상세
+                                </button>
                                 <button class="px-3 py-1 text-xs font-medium bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg transition-colors">수정</button>
                             </div>
                         </td>
@@ -140,5 +150,77 @@ if ($search_name !== '' || $search_dept !== '' || $search_date !== '') {
     </div>
 </div>
 
-<?php include 'include/footer.php'; ?>
+<div id="certificateModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black bg-opacity-60 overflow-y-auto py-10">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl overflow-hidden border border-gray-300 my-auto">
+        
+        <div class="px-6 py-4 bg-gray-800 text-white flex justify-between items-center no-print">
+            <h3 class="text-lg font-bold tracking-wide">📄 진단서 상세 보기</h3>
+            <button type="button" onclick="closeCertModal()" class="text-gray-400 hover:text-white text-2xl font-semibold">&times;</button>
+        </div>
 
+        <div id="printArea" class="p-10 bg-white text-black font-sans">
+            <div class="text-center mb-10">
+                <h1 class="text-4xl font-extrabold tracking-[1em] text-center uppercase border-b-4 border-double border-black pb-4 inline-block w-full">진단서</h1>
+            </div>
+
+            <table class="w-full border-collapse border border-black text-sm mb-6">
+                <tbody>
+                    <tr>
+                        <td class="border border-black bg-gray-50 px-4 py-3 font-bold text-center w-24">병명</td>
+                        <td class="border border-black px-4 py-3" id="cert_diagnosis">--</td>
+                        <td class="border border-black bg-gray-50 px-4 py-3 font-bold text-center w-28">진료 일자</td>
+                        <td class="border border-black px-4 py-3 w-40" id="cert_date">--</td>
+                    </tr>
+                    <tr>
+                        <td class="border border-black bg-gray-50 px-4 py-3 font-bold text-center">환자 성명</td>
+                        <td class="border border-black px-4 py-3 font-bold text-base" id="cert_name">--</td>
+                        <td class="border border-black bg-gray-50 px-4 py-3 font-bold text-center">차트 번호</td>
+                        <td class="border border-black px-4 py-3 font-mono" id="cert_id">--</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="border border-black p-6 min-h-[150px] mb-6">
+                <h3 class="font-bold text-sm text-gray-700 mb-2">■ 처방 내역 및 조제 정보</h3>
+                <p class="text-base leading-relaxed pl-2 whitespace-pre-wrap" id="cert_prescription">--</p>
+            </div>
+
+            <div class="border border-black p-6 min-h-[200px] mb-12">
+                <h3 class="font-bold text-sm text-gray-700 mb-2">■ 의사 소견 및 향후 치료 의견</h3>
+                <p class="text-base leading-relaxed pl-2 whitespace-pre-wrap" id="cert_note">--</p>
+            </div>
+
+            <div class="text-center space-y-2 mb-8">
+                <p class="text-lg font-medium">위와 같이 진단합니다.</p>
+                <p class="text-gray-600 font-mono" id="cert_today_date">2026년 06월 05일</p>
+            </div>
+
+            <div class="flex justify-end items-center gap-4 border-t border-gray-200 pt-6">
+                <div class="text-right">
+                    <p class="text-sm text-gray-500">의료기관 명칭 : 새싹종합병원</p>
+                    <p class="text-base font-bold text-gray-800">담당의사 : 홍길동 (인)</p>
+                </div>
+                <div class="w-14 h-14 border border-red-400 rounded-full flex items-center justify-center text-red-500 text-xs font-bold border-dashed transform rotate-12">
+                    새싹병원
+                </div>
+            </div>
+        </div>
+
+        <div class="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-2 no-print">
+            <button type="button" onclick="closeCertModal()" class="px-4 py-2 text-sm font-medium bg-white hover:bg-gray-100 text-gray-700 border border-gray-200 rounded-lg transition-colors">닫기</button>
+            <button type="button" onclick="printCertificate()" class="px-4 py-2 text-sm font-medium bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors flex items-center gap-1">
+                🖨️ 진단서 출력
+            </button>
+        </div>
+
+    </div>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+<script src="../js/chart.js"></script>
+
+<?php 
+// 기존에 쓰시던 푸터 경로 그대로 유지합니다.
+include 'include/footer.php'; 
+?>

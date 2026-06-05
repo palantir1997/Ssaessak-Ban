@@ -66,6 +66,7 @@ CREATE TABLE IF NOT EXISTS medical_staffs (
     phone VARCHAR(20) NOT NULL COMMENT '연락처',
     hire_date DATE NOT NULL COMMENT '입사일',
     status ENUM('재직중', '휴직중', '퇴사') DEFAULT '재직중' COMMENT '근무 상태',
+    work_schedule VARCHAR(100) DEFAULT '미정' COMMENT '근무 스케줄',
     account_id VARCHAR(50) NULL COMMENT 'ERP 시스템 연동 아이디',
     FOREIGN KEY (account_id) REFERENCES staff_accounts(user_id) ON UPDATE CASCADE ON DELETE SET NULL
 ) ENGINE=InnoDB COMMENT='의료진 세부 프로필 및 인사 정보';
@@ -172,6 +173,7 @@ INSERT INTO medical_staffs (staff_no, name, position, dept_name, phone, hire_dat
 ('DR-1004', '이지민', '의사', '소아청소년과', '010-4567-8901', '2024-02-20', '재직중', NULL),
 ('NR-2001', '한소희', '간호사', '종합건진센터', '010-5678-9012', '2022-07-01', '재직중', 'nr_han'),
 ('NR-2002', '정다은', '간호사', '일반내과', '010-6789-0123', '2023-09-01', '휴직중', 'nr_jung');
+
 
 -- 4) 신규 외래 접수 현황 데이터 (reception.php 화면 일치)
 INSERT INTO receptions (reception_no, patient_name, reception_type, dept_name, target_date, target_time, symptoms_memo, status) VALUES

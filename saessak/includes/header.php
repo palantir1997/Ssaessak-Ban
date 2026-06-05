@@ -140,7 +140,7 @@ if (session_status() === PHP_SESSION_NONE) { session_start(); }
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
 
-            <form id="modal-login-form" action="includes/login_process.php" method="POST" class="space-y-5">
+            <form id="modal-login-form" action="includes/patient_login_process.php" method="POST" class="space-y-5">
                 <div class="text-center space-y-2">
                     <h3 class="text-2xl font-bold text-gray-900 tracking-tight">환자 로그인</h3>
                     <p class="text-xs text-gray-400">새싹병원 통합 전산 예약을 위해 회원 계정을 입력해 주세요.</p>

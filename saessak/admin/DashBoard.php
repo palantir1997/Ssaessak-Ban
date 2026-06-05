@@ -178,14 +178,19 @@
         <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
             <h2 class="text-lg font-bold text-gray-800 mb-4">빠른 실행</h2>
             <div class="grid grid-cols-2 gap-3">
-                <button class="flex flex-col items-center justify-center p-4 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors gap-2">
-                    <i data-lucide="user-plus" class="w-6 h-6"></i>
-                    <span class="font-medium text-sm">현장 접수</span>
-                </button>
-                <button class="flex flex-col items-center justify-center p-4 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors gap-2">
-                    <i data-lucide="megaphone" class="w-6 h-6"></i>
-                    <span class="font-medium text-sm">긴급 공지</span>
-                </button>
+                <a href="reception.php" class="block">
+                    <button class="flex flex-col items-center justify-center w-full p-4 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors gap-2">
+                        <i data-lucide="user-plus" class="w-6 h-6"></i>
+                        <span class="font-medium text-sm">현장 접수</span>
+                    </button>
+                </a>
+
+                <a href="notice.php" class="block">
+                    <button class="flex flex-col items-center justify-center w-full p-4 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors gap-2">
+                        <i data-lucide="megaphone" class="w-6 h-6"></i>
+                        <span class="font-medium text-sm">긴급 공지</span>
+                    </button>
+                </a>
             </div>
         </div>
     </div>
