@@ -1,5 +1,5 @@
 <?php
-include '../include/header.php';
+include 'include/header.php'; 
 
 $db_host = '172.16.11.222'; 
 $db_user = 'root'; 
@@ -177,4 +177,4 @@ function get_status_color($status) {
     </div>
 </div>
 
-<?php include '../include/footer.php'; ?>
+<?php include 'include/footer.php';  ?>
