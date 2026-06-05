@@ -67,8 +67,23 @@ while($row = mysqli_fetch_assoc($debug_q)) {
 }
 echo "</div>";
 
+// 1. 현재 IP의 실패 횟수를 가져오는 쿼리
+$my_ip = $_SERVER['REMOTE_ADDR'];
+$count_q = mysqli_query($conn, "SELECT COUNT(*) as cnt FROM login_attempts WHERE ip_address = '$my_ip'");
+$count_row = mysqli_fetch_assoc($count_q);
+$my_fail_count = $count_row['cnt'];
+
 ?>
 
+<div class="mb-6 flex gap-4 items-center bg-gray-900 p-4 rounded-xl text-white">
+    <div class="animate-pulse w-3 h-3 bg-red-500 rounded-full"></div>
+    <span class="font-bold">보안 감시 중:</span>
+    <span>현재 접속 IP(<?php echo $my_ip; ?>)의 누적 실패 횟수: </span>
+    <span class="text-2xl font-black text-red-500"><?php echo $my_fail_count; ?>회</span>
+    <?php if($my_fail_count >= 5): ?>
+        <span class="text-sm bg-red-600 px-2 py-1 rounded">⚠️ 경고: 차단 권고 기준 도달</span>
+    <?php endif; ?>
+</div>
 
 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
     <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-lg text-gray-200">
