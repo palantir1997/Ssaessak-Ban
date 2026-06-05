@@ -3,9 +3,9 @@ include 'include/header.php';
 
 // 1. 데이터베이스 연결
 try {
-    $db_host = '172.16.11.222'; 
-    $db_user = 'root';
-    $db_pass = ''; 
+    $db_host = 'localhost'; 
+    $db_user = 'saessak';
+    $db_pass = '1234'; // MySQL 비밀번호가 있다면 여기에 입력하세요
     $db_name = 'saessak';
     $db_port = 3306; 
 
