@@ -61,7 +61,7 @@ $(document).ready(function() {
         const updatedNotes = $('#edit_notes').val();
         
         $.ajax({
-            url: 'mr_update.php', // 💡 chart_update.php 대신 제안하신 파일명으로 매핑!
+            url: 'mr_update.php',
             type: 'POST',
             dataType: 'json',
             data: {

@@ -266,5 +266,5 @@ if ($search_name !== '' || $search_dept !== '' || $search_date !== '') {
 </div>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-<script src="medical_record.js"></script>
+<script src="../js/medical_record.js"></script>
 <?php include 'include/footer.php'; ?>
