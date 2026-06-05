@@ -9,9 +9,9 @@ mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 */
 
 try {
-    $db_host = '172.16.11.222'; 
-    $db_user = 'root';
-    $db_pass = ''; 
+    $db_host = '175.210.161.42'; 
+    $db_user = 'DH';
+    $db_pass = '1234'; 
     $db_name = 'saessak';
     $db_port = 3306; 
 
