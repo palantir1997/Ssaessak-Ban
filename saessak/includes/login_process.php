@@ -1,51 +1,59 @@
 <?php
 session_start();
+
+// 데이터베이스 연결
 include_once __DIR__ . '/db.php';
 
-$login_id = trim($_POST['login_id'] ?? '');
+$user_id = trim($_POST['user_id'] ?? '');
 $password = trim($_POST['password'] ?? '');
 
-// 환자 웹 전용 테스트 계정. 관리자(admin) 계정과 분리합니다.
-$demo_patient_id = 'patient';
-$demo_patient_pw = '1234';
-$demo_patient_name = '환자테스트';
-
 $login_success = false;
-$patient_id = 0;
-$patient_name = '';
 
+// 1️⃣ 먼저 데이터베이스의 staff_accounts 테이블에서 검색
 if ($conn) {
-    $stmt = mysqli_prepare($conn, 'SELECT id, name, login_id FROM patients WHERE login_id = ? AND password = ? LIMIT 1');
+    $stmt = mysqli_prepare($conn, 'SELECT user_id, name FROM staff_accounts WHERE user_id = ? AND password = ? AND status = "활성" LIMIT 1');
+    
     if ($stmt) {
-        mysqli_stmt_bind_param($stmt, 'ss', $login_id, $password);
+        mysqli_stmt_bind_param($stmt, 'ss', $user_id, $password);
         mysqli_stmt_execute($stmt);
         $result = mysqli_stmt_get_result($stmt);
 
         if ($row = mysqli_fetch_assoc($result)) {
             $login_success = true;
-            $patient_id = $row['id'];
-            $patient_name = $row['name'];
-            $login_id = $row['login_id'];
+            $_SESSION['admin_id'] = $row['user_id'];
+            $_SESSION['admin_name'] = $row['name'];
+            $_SESSION['login_type'] = 'admin'; // 관리자 구분 플래그
         }
+        
+        mysqli_stmt_close($stmt);
     }
 }
 
-// DB가 꺼져 있거나 patients 테이블이 아직 없어도 발표용 환자 계정은 로그인되게 유지합니다.
-if (!$login_success && $login_id === $demo_patient_id && $password === $demo_patient_pw) {
-    $login_success = true;
-    $patient_id = 1;
-    $patient_name = $demo_patient_name;
+// 2️⃣ DB가 없거나 계정이 없으면 하드코딩된 관리자 계정으로 대체 (테스트용)
+if (!$login_success) {
+    $test_admin_id = 'admin';
+    $test_admin_pw = '1234';
+    
+    if ($user_id === $test_admin_id && $password === $test_admin_pw) {
+        $login_success = true;
+        $_SESSION['admin_id'] = $test_admin_id;
+        $_SESSION['admin_name'] = '관리자';
+        $_SESSION['login_type'] = 'admin';
+    }
 }
 
+// 3️⃣ 로그인 성공 여부 판단
 if ($login_success) {
-    // 환자 계정 전용 세션. admin 세션은 건드리지 않습니다.
-    $_SESSION['patient_id'] = $patient_id;
-    $_SESSION['patient_login_id'] = $login_id;
-    $_SESSION['patient_name'] = $patient_name;
-    echo "<script>alert('" . addslashes($patient_name) . "님 로그인되었습니다.'); location.href='../index.php';</script>";
+    echo "<script>
+        alert('✅ 관리자 로그인되었습니다.');
+        location.href='../dashboard.php';
+    </script>";
+    exit();
+} else {
+    echo "<script>
+        alert('❌ 아이디 또는 비밀번호가 틀렸습니다.\\n\\n테스트 계정: admin / 1234');
+        history.back();
+    </script>";
     exit();
 }
-
-echo "<script>alert('환자 로그인 실패: ID 또는 비밀번호를 확인해 주세요.'); location.href='../index.php';</script>";
-exit();
 ?>

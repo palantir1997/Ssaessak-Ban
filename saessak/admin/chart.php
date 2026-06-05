@@ -141,3 +141,4 @@ if ($search_name !== '' || $search_dept !== '' || $search_date !== '') {
 </div>
 
 <?php include 'include/footer.php'; ?>
+

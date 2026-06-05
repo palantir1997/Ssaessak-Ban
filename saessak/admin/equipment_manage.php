@@ -1,11 +1,17 @@
 <?php
 // 1. 헤더 불러오기 (경로는 파일 구조에 맞게 유지)
-include '../include/header.php';
+include './include/header.php';
+?>
+
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../css/patient.css">
+
+<?php
 
 // 2. 이 페이지 전용 DB 연결 (방금 만든 우분투 계정 사용!)
-$db_host = '192.168.0.53';
-$db_user = 'saessak_user';
-$db_pass = '1234';
+$db_host = '172.16.11.222';
+$db_user = 'root';
+$db_pass = '';
 $db_name = 'saessak';
 
 // mysqli 연결 생성 (변수명을 $conn으로 고정)
@@ -20,9 +26,18 @@ if (!$conn) {
     // 연결 성공 시 한글 깨짐 방지 설정
     mysqli_set_charset($conn, 'utf8mb4');
 
-    // 3. [INSERT] 신규 장비 폼 제출 처리
-    if ($_SERVER["REQUEST_METHOD"] == "POST" && !empty($_POST['equipment_name'])) {
-        $equipment_no = mysqli_real_escape_string($conn, $_POST['equipment_no']);
+   // 3. [INSERT] 신규 장비 폼 제출 처리
+if ($_SERVER["REQUEST_METHOD"] == "POST" && !empty($_POST['equipment_name'])) {
+    $equipment_no = mysqli_real_escape_string($conn, $_POST['equipment_no']);
+    
+    // ⭐ 여기 추가: 중복 체크!
+    $check_query = "SELECT * FROM medical_equipments WHERE equipment_no = '$equipment_no'";
+    $check_result = mysqli_query($conn, $check_query);
+    
+    if (mysqli_num_rows($check_result) > 0) {
+        echo "<script>alert('⚠️ 이미 등록된 관리번호입니다!\\n다른 번호를 입력하세요.');</script>";
+    } else {
+        // 중복 아니면 계속 진행
         $equipment_name = mysqli_real_escape_string($conn, $_POST['equipment_name']);
         $category = mysqli_real_escape_string($conn, $_POST['category']);
         $purchase_date = mysqli_real_escape_string($conn, $_POST['purchase_date']);
@@ -42,6 +57,7 @@ if (!$conn) {
             echo "<script>alert('DB 저장 오류: " . mysqli_error($conn) . "');</script>";
         }
     }
+}
 
     // 4. [SELECT] DB에서 장비 목록 불러오기
     $sql_select = "SELECT * FROM medical_equipments ORDER BY created_at DESC";
@@ -177,4 +193,5 @@ function get_equip_status_color($status) {
     </div>
 </div>
 
-<?php include '../includes/footer.php'; ?>
+<?php // include './include/footer.php'; 
+?>
