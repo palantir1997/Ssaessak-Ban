@@ -1,51 +1,60 @@
 <?php
 include 'include/header.php';
 
-$mock_charts = [
-    ["chart_id" => "CH-1001", "name" => "김철수", "age" => 45, "dept" => "내과", "doctor" => "박건우", "date" => "2026-06-02", "diagnosis" => "고혈압", "prescription" => "암로디핀 5mg", "note" => "혈압 145/90, 1개월 후 재진"],
-    ["chart_id" => "CH-1002", "name" => "이영희", "age" => 32, "dept" => "이비인후과", "doctor" => "김새싹", "date" => "2026-06-02", "diagnosis" => "급성 편도염", "prescription" => "항생제 5일치", "note" => "초진, 발열 38.2도"],
-    ["chart_id" => "CH-1003", "name" => "박지민", "age" => 28, "dept" => "정형외과", "doctor" => "최태양", "date" => "2026-06-01", "diagnosis" => "요추 추간판 탈출증", "prescription" => "소염진통제", "note" => "X-Ray 촬영 완료, MRI 권고"],
-    ["chart_id" => "CH-1004", "name" => "최동훈", "age" => 61, "dept" => "내과", "doctor" => "박건우", "date" => "2026-06-01", "diagnosis" => "당뇨 2형", "prescription" => "메트포르민 500mg", "note" => "혈당 186, 식이요법 안내"],
-];
+// 1. 우분투 MySQL DB 연결 설정
+$db_host = '192.168.45.213'; 
+$db_user = 'hj';   
+$db_pass = '1234'; 
+$db_name = 'saessak';   
 
+try {
+    $pdo = new PDO("mysql:host=$db_host;dbname=$db_name;charset=utf8mb4", $db_user, $db_pass);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (PDOException $e) {
+    die("<div class='p-4 bg-red-50 text-red-700 rounded-lg'>DB 연결 실패: " . htmlspecialchars($e->getMessage()) . "</div>");
+}
+
+// 2. 검색 필터 처리
 $search_name = isset($_GET['search_name']) ? trim($_GET['search_name']) : '';
 $search_dept = isset($_GET['search_dept']) ? trim($_GET['search_dept']) : '';
 $search_date = isset($_GET['search_date']) ? trim($_GET['search_date']) : '';
 
-$filtered_charts = $mock_charts;
 $error_message = "";
+$records = [];
 
+// 조건별 SQL 쿼리 실행
 if ($search_name !== '' || $search_dept !== '' || $search_date !== '') {
     if ($search_name === '' || $search_dept === '' || $search_date === '') {
         $error_message = "환자명, 진료과, 진료일을 모두 입력하셔야 검색이 가능합니다.";
+        $stmt = $pdo->query("SELECT * FROM medical_records ORDER BY record_date DESC, chart_no DESC");
+        $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
     } else {
-        $filtered_charts = array_filter($mock_charts, function($chart) use ($search_name, $search_dept, $search_date) {
-            $name_match = (strpos($chart['name'], $search_name) !== false);
-            $dept_match = ($chart['dept'] === $search_dept);
-            $date_match = ($chart['date'] === $search_date);
-            return $name_match && $dept_match && $date_match;
-        });
+        $sql = "SELECT * FROM medical_records 
+                WHERE patient_name LIKE :name 
+                  AND dept_name = :dept 
+                  AND record_date = :rdate 
+                ORDER BY record_date DESC";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([
+            ':name'  => '%' . $search_name . '%',
+            ':dept'  => $search_dept,
+            ':rdate' => $search_date
+        ]);
+        $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+} else {
+    // 기본 첫 진입 시 전체 목록 로드
+    $stmt = $pdo->query("SELECT * FROM medical_records ORDER BY record_date DESC, chart_no DESC");
+    $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 ?>
 
 <style>
 @media print {
-    body * {
-        visibility: hidden;
-    }
-    #printArea, #printArea * {
-        visibility: visible;
-    }
-    #printArea {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-    }
-    .no-print {
-        display: none !important;
-    }
+    body * { visibility: hidden; }
+    #printArea, #printArea * { visibility: visible; }
+    #printArea { position: absolute; left: 0; top: 0; width: 100%; }
+    .no-print { display: none !important; }
 }
 </style>
 
@@ -55,17 +64,17 @@ if ($search_name !== '' || $search_dept !== '' || $search_date !== '') {
 </div>
 <?php endif; ?>
 
-<form method="GET" action="chart.php" class="bg-white rounded-xl border border-gray-200 shadow-sm p-6 mb-6">
+<form method="GET" action="medical_record.php" class="bg-white rounded-xl border border-gray-200 shadow-sm p-6 mb-6">
     <h2 class="text-lg font-bold text-gray-800 mb-4">진료 기록 검색</h2>
     <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
         <div>
             <label class="block text-xs font-bold text-gray-500 mb-1">환자명 <span class="text-red-500">*</span></label>
-            <input type="text" name="search_name" value="<?php echo htmlspecialchars($search_name); ?>" placeholder="환자명 입력" required
+            <input type="text" name="search_name" value="<?php echo htmlspecialchars($search_name); ?>" placeholder="환자명 입력"
                 class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500">
         </div>
         <div>
             <label class="block text-xs font-bold text-gray-500 mb-1">진료과 <span class="text-red-500">*</span></label>
-            <select name="search_dept" required class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500">
+            <select name="search_dept" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500">
                 <option value="">선택해주세요</option>
                 <option value="내과" <?php echo $search_dept === '내과' ? 'selected' : ''; ?>>내과</option>
                 <option value="이비인후과" <?php echo $search_dept === '이비인후과' ? 'selected' : ''; ?>>이비인후과</option>
@@ -76,7 +85,7 @@ if ($search_name !== '' || $search_dept !== '' || $search_date !== '') {
         </div>
         <div>
             <label class="block text-xs font-bold text-gray-500 mb-1">진료일 <span class="text-red-500">*</span></label>
-            <input type="date" name="search_date" value="<?php echo htmlspecialchars($search_date); ?>" required
+            <input type="date" name="search_date" value="<?php echo htmlspecialchars($search_date); ?>"
                 class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500">
         </div>
         <div class="flex items-end">
@@ -92,7 +101,7 @@ if ($search_name !== '' || $search_dept !== '' || $search_date !== '') {
         <div class="flex justify-between items-center">
             <h2 class="text-lg font-bold text-gray-800">진료 기록 / 차트</h2>
             <?php if ($search_name !== '' || $search_dept !== '' || $search_date !== ''): ?>
-                <a href="chart.php" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-600 px-3 py-1.5 rounded-lg font-medium transition-colors">전체 목록 보기</a>
+                <a href="medical_record.php" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-600 px-3 py-1.5 rounded-lg font-medium transition-colors">전체 목록 보기</a>
             <?php endif; ?>
         </div>
     </div>
@@ -113,40 +122,34 @@ if ($search_name !== '' || $search_dept !== '' || $search_date !== '') {
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
-                <?php if (count($filtered_charts) > 0): ?>
-                    <?php foreach ($filtered_charts as $chart): ?>
-                    <tr class="hover:bg-gray-50 transition-colors">
-                        <td class="px-6 py-4 text-gray-400 font-mono text-xs"><?php echo htmlspecialchars($chart['chart_id']); ?></td>
-                        <td class="px-6 py-4 font-bold text-gray-800"><?php echo htmlspecialchars($chart['name']); ?></td>
-                        <td class="px-6 py-4 text-gray-600"><?php echo htmlspecialchars($chart['age']); ?></td>
-                        <td class="px-6 py-4 text-gray-600"><?php echo htmlspecialchars($chart['dept']); ?></td>
-                        <td class="px-6 py-4 text-gray-600"><?php echo htmlspecialchars($chart['doctor']); ?></td>
-                        <td class="px-6 py-4 text-gray-600"><?php echo htmlspecialchars($chart['date']); ?></td>
-                        <td class="px-6 py-4 font-medium text-gray-800"><?php echo htmlspecialchars($chart['diagnosis']); ?></td>
-                        <td class="px-6 py-4 text-gray-600 text-xs"><?php echo htmlspecialchars($chart['prescription']); ?></td>
-                        <td class="px-6 py-4 text-gray-500 text-xs max-w-xs truncate"><?php echo htmlspecialchars($chart['note']); ?></td>
+                <?php if (count($records) > 0): ?>
+                    <?php foreach ($records as $row): ?>
+                    <tr class="hover:bg-gray-50 transition-colors" data-id="<?php echo $row['chart_no']; ?>">
+                        <td class="px-6 py-4 text-gray-400 font-mono text-xs"><?php echo htmlspecialchars($row['chart_no']); ?></td>
+                        <td class="px-6 py-4 font-bold text-gray-800"><?php echo htmlspecialchars($row['patient_name']); ?></td>
+                        <td class="px-6 py-4 text-gray-600"><?php echo htmlspecialchars($row['age']); ?></td>
+                        <td class="px-6 py-4 text-gray-600"><?php echo htmlspecialchars($row['dept_name']); ?></td>
+                        <td class="px-6 py-4 text-gray-600"><?php echo htmlspecialchars($row['doctor_name']); ?></td>
+                        <td class="px-6 py-4 text-gray-600"><?php echo htmlspecialchars($row['record_date']); ?></td>
+                        <td class="px-6 py-4 font-medium text-gray-800"><?php echo htmlspecialchars($row['diagnosis']); ?></td>
+                        <td class="px-6 py-4 text-gray-600 text-xs"><?php echo htmlspecialchars($row['prescription']); ?></td>
+                        <td class="px-6 py-4 text-gray-500 text-xs max-w-xs truncate"><?php echo htmlspecialchars($row['notes']); ?></td>
                         <td class="px-6 py-4">
                             <div class="flex gap-2">
                                 <button type="button" 
-                                onclick="openCertificate('<?php echo $chart['chart_id']; ?>', '<?php echo htmlspecialchars($chart['name']); ?>', '<?php echo htmlspecialchars($chart['doctor']); ?>', '<?php echo $chart['date']; ?>', '<?php echo htmlspecialchars($chart['diagnosis']); ?>', '<?php echo htmlspecialchars($chart['prescription']); ?>', '<?php echo htmlspecialchars($chart['note']); ?>')"
-                                class="px-3 py-1 text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors">
-                                 상세
-                                </button>
-
+                                onclick="openCertificate('<?php echo $row['chart_no']; ?>', '<?php echo htmlspecialchars($row['patient_name'], ENT_QUOTES); ?>', '<?php echo htmlspecialchars($row['doctor_name'], ENT_QUOTES); ?>', '<?php echo $row['record_date']; ?>')"
+                                class="px-3 py-1 text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors">상세</button>
+                                
                                 <button type="button"
-                                onclick="openEditModal('<?php echo $chart['chart_id']; ?>', '<?php echo htmlspecialchars($chart['name']); ?>', '<?php echo htmlspecialchars($chart['dept']); ?>', '<?php echo htmlspecialchars($chart['doctor']); ?>', '<?php echo $chart['date']; ?>', '<?php echo htmlspecialchars($chart['diagnosis']); ?>', '<?php echo htmlspecialchars($chart['prescription']); ?>', '<?php echo htmlspecialchars($chart['note']); ?>')"
-                                class="px-3 py-1 text-xs font-medium bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg transition-colors">
-                                    수정
-                                </button>
+                                onclick="openEditModal('<?php echo $row['chart_no']; ?>', '<?php echo htmlspecialchars($row['patient_name'], ENT_QUOTES); ?>', '<?php echo htmlspecialchars($row['dept_name'], ENT_QUOTES); ?>', '<?php echo htmlspecialchars($row['doctor_name'], ENT_QUOTES); ?>', '<?php echo $row['record_date']; ?>')"
+                                class="px-3 py-1 text-xs font-medium bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg transition-colors">수정</button>
                             </div>
                         </td>
                     </tr>
                     <?php endforeach; ?>
                 <?php else: ?>
                     <tr>
-                        <td colspan="10" class="px-6 py-12 text-center text-gray-400">
-                            일치하는 진료 기록이 없습니다.
-                        </td>
+                        <td colspan="10" class="px-6 py-12 text-center text-gray-400">일치하는 진료 기록이 없습니다.</td>
                     </tr>
                 <?php endif; ?>
             </tbody>
@@ -156,17 +159,14 @@ if ($search_name !== '' || $search_dept !== '' || $search_date !== '') {
 
 <div id="certificateModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black bg-opacity-60 overflow-y-auto py-10">
     <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl overflow-hidden border border-gray-300 my-auto">
-        
         <div class="px-6 py-4 bg-gray-800 text-white flex justify-between items-center no-print">
             <h3 class="text-lg font-bold tracking-wide">📄 진단서 상세 보기</h3>
             <button type="button" onclick="closeCertModal()" class="text-gray-400 hover:text-white text-2xl font-semibold">&times;</button>
         </div>
-
         <div id="printArea" class="p-10 bg-white text-black font-sans">
             <div class="text-center mb-10">
                 <h1 class="text-4xl font-extrabold tracking-[1em] text-center uppercase border-b-4 border-double border-black pb-4 inline-block w-full">진단서</h1>
             </div>
-
             <table class="w-full border-collapse border border-black text-sm mb-6">
                 <tbody>
                     <tr>
@@ -183,22 +183,18 @@ if ($search_name !== '' || $search_dept !== '' || $search_date !== '') {
                     </tr>
                 </tbody>
             </table>
-
             <div class="border border-black p-6 min-h-[150px] mb-6">
                 <h3 class="font-bold text-sm text-gray-700 mb-2">■ 처방 내역 및 조제 정보</h3>
                 <p class="text-base leading-relaxed pl-2 whitespace-pre-wrap" id="cert_prescription">--</p>
             </div>
-
             <div class="border border-black p-6 min-h-[200px] mb-12">
                 <h3 class="font-bold text-sm text-gray-700 mb-2">■ 의사 소견 및 향후 치료 의견</h3>
-                <p class="text-base leading-relaxed pl-2 whitespace-pre-wrap" id="cert_note">--</p>
+                <p class="text-base leading-relaxed pl-2 whitespace-pre-wrap" id="cert_notes">--</p>
             </div>
-
             <div class="text-center space-y-2 mb-8">
                 <p class="text-lg font-medium">위와 같이 진단합니다.</p>
-                <p class="text-gray-600 font-mono" id="cert_today_date">2026년 06월 05일</p>
+                <p class="text-gray-600 font-mono" id="cert_today_date">--</p>
             </div>
-
             <div class="flex justify-end items-center gap-4 border-t border-gray-200 pt-6">
                 <div class="text-right">
                     <p class="text-sm text-gray-500">의료기관 : 새싹종합병원</p>
@@ -209,31 +205,24 @@ if ($search_name !== '' || $search_dept !== '' || $search_date !== '') {
                 </div>
             </div>
         </div>
-
         <div class="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-2 no-print">
             <button type="button" onclick="closeCertModal()" class="px-4 py-2 text-sm font-medium bg-white hover:bg-gray-100 text-gray-700 border border-gray-200 rounded-lg transition-colors">닫기</button>
-            <button type="button" onclick="printCertificate()" class="px-4 py-2 text-sm font-medium bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors flex items-center gap-1">
-                🖨️ 진단서 출력
-            </button>
+            <button type="button" onclick="printCertificate()" class="px-4 py-2 text-sm font-medium bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors flex items-center gap-1">🖨️ 진단서 출력</button>
         </div>
-
     </div>
 </div>
 
 <div id="editChartModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black bg-opacity-60 overflow-y-auto py-10">
     <div class="bg-white rounded-xl shadow-2xl w-full max-w-xl overflow-hidden border border-gray-300 my-auto">
-        
         <div class="px-6 py-4 bg-blue-600 text-white flex justify-between items-center">
             <h3 class="text-lg font-bold tracking-wide">✏️ 진료기록 수정 (정정)</h3>
             <button type="button" onclick="closeEditModal()" class="text-white hover:text-gray-200 text-2xl font-semibold">&times;</button>
         </div>
-
-        <form id="editChartForm" method="POST" action="chart_update_mock.php" class="p-6 space-y-4">
-            
+        <form id="editChartForm" class="p-6 space-y-4">
             <div class="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg border border-gray-100">
                 <div>
                     <label class="block text-xs font-bold text-gray-400 mb-1">차트 번호</label>
-                    <input type="text" id="edit_id" name="chart_id" readonly
+                    <input type="text" id="edit_id" name="chart_no" readonly
                         class="w-full px-3 py-2 bg-gray-100 border border-gray-200 rounded-lg text-sm text-gray-500 cursor-not-allowed focus:outline-none">
                 </div>
                 <div>
@@ -252,42 +241,30 @@ if ($search_name !== '' || $search_dept !== '' || $search_date !== '') {
                         class="w-full px-3 py-2 bg-gray-100 border border-gray-200 rounded-lg text-sm text-gray-500 cursor-not-allowed focus:outline-none">
                 </div>
             </div>
-
             <hr class="border-gray-200">
-
             <div>
                 <label class="block text-xs font-bold text-gray-700 mb-1">진단명 <span class="text-red-500">*</span></label>
                 <input type="text" id="edit_diagnosis" name="diagnosis" required
                     class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500">
             </div>
-
             <div>
                 <label class="block text-xs font-bold text-gray-700 mb-1">■ 처방 내역 및 조제 정보</label>
                 <textarea id="edit_prescription" name="prescription" rows="3"
                     class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500 font-mono text-xs"></textarea>
             </div>
-
             <div>
                 <label class="block text-xs font-bold text-gray-700 mb-1">■ 의사 소견 및 비고</label>
-                <textarea id="edit_note" name="note" rows="4"
+                <textarea id="edit_notes" name="notes" rows="4"
                     class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500 text-xs"></textarea>
             </div>
-
             <div class="flex justify-end gap-2 pt-2">
-                <button type="button" onclick="closeEditModal()" 
-                    class="px-4 py-2 text-sm font-medium bg-white hover:bg-gray-100 text-gray-700 border border-gray-200 rounded-lg transition-colors">취소</button>
-                <button type="submit" onclick="" 
-                    class="px-4 py-2 text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">수정 완료</button>
+                <button type="button" onclick="closeEditModal()" class="px-4 py-2 text-sm font-medium bg-white hover:bg-gray-100 text-gray-700 border border-gray-200 rounded-lg transition-colors">취소</button>
+                <button type="submit" class="px-4 py-2 text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">수정 완료</button>
             </div>
         </form>
-
     </div>
 </div>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-
-<script src="../js/chart.js"></script>
-
-<?php 
-include 'include/footer.php'; 
-?>
+<script src="medical_record.js"></script>
+<?php include 'include/footer.php'; ?>

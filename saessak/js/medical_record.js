@@ -1,68 +1,92 @@
-// ================= [1] 진단서 모달 열기 및 데이터 매핑 =================
-function openCertificate(id, name, doctor, date, diagnosis, prescription, note) {
-    // jQuery 데이터 매핑
+// ================= [1] 진단서 상세 보기 모달 열기 및 데이터 매핑 =================
+function openCertificate(id, name, doctor, date) {
+    const targetRow = $(`tr[data-id="${id}"]`);
+    const currentDiagnosis = targetRow.find('td').eq(6).text();
+    const currentPrescription = targetRow.find('td').eq(7).text();
+    const currentNotes = targetRow.find('td').eq(8).text();
+
     $('#cert_id').text(id);
     $('#cert_name').text(name);
-    $('#cert_doctor').text(doctor ? doctor : '미지정'); // ⭐ 의사 데이터 매핑 추가
+    $('#cert_doctor').text(doctor ? doctor : '미지정'); 
     $('#cert_date').text(date);
-    $('#cert_diagnosis').text(diagnosis ? diagnosis : '미입력');
-    $('#cert_prescription').text(prescription ? prescription : '처방 내역 없음');
-    $('#cert_note').text(note ? note : '특이사항 없음');
     
-    // 오늘 날짜 자동 생성해서 진단서 발행일로 표기
+    $('#cert_diagnosis').text(currentDiagnosis ? currentDiagnosis : '미입력');
+    $('#cert_prescription').text(currentPrescription ? currentPrescription : '처방 내역 없음');
+    $('#cert_notes').text(currentNotes ? currentNotes : '특이사항 없음');
+    
     const today = new Date();
     const formattedDate = `${today.getFullYear()}년 ${String(today.getMonth() + 1).padStart(2, '0')}월 ${String(today.getDate()).padStart(2, '0')}일`;
     $('#cert_today_date').text(formattedDate);
 
-    // hidden 클래스를 지우는 대신, display 스타일을 flex로 강제 지정하여 팝업을 띄웁니다.
     $('#certificateModal').css('display', 'flex').removeClass('hidden');
 }
 
-// 2. 진단서 모달 닫기
 function closeCertModal() {
-    // ⭐ 모달을 숨깁니다.
     $('#certificateModal').css('display', 'none').addClass('hidden');
 }
 
-// 3. 진단서 출력 기능
 function printCertificate() {
     window.print();
 }
 
-// ================= [2] 진료기록 수정(정정) 모달 제어 및 서브밋 =================
+// ================= [2] 진료기록 수정(정정) 모달 제어 =================
+function openEditModal(id, name, dept, doctor, date) {
+    const targetRow = $(`tr[data-id="${id}"]`);
 
-// 수정 모달 열기 및 데이터 바인딩
-function openEditModal(id, name, dept, doctor, date, diagnosis, prescription, note) {
-    // 1. 보안 영역 데이터 매핑 (Readonly 필드)
     $('#edit_id').val(id);
     $('#edit_name').val(name);
     $('#edit_date').val(date);
-    $('#edit_doctor_dept').val(`${doctor} (${dept})`); // '홍길동 (내과)' 포맷으로 표기
+    $('#edit_doctor_dept').val(`${doctor} (${dept})`); 
     
-    // 2. 수정 가능 진료 영역 데이터 매핑
-    $('#edit_diagnosis').val(diagnosis);
-    $('#edit_prescription').val(prescription);
-    $('#edit_note').val(note);
+    $('#edit_diagnosis').val(targetRow.find('td').eq(6).text());
+    $('#edit_prescription').val(targetRow.find('td').eq(7).text());
+    $('#edit_notes').val(targetRow.find('td').eq(8).text());
 
-    // 3. 모달 팝업 가시화
     $('#editChartModal').css('display', 'flex').removeClass('hidden');
 }
 
-// 수정 모달 닫기
 function closeEditModal() {
     $('#editChartModal').css('display', 'none').addClass('hidden');
-    $('#editChartForm')[0].reset(); // 입력 폼 초기화
+    $('#editChartForm')[0].reset();
 }
 
-// 수정 폼 제출 처리 (DB 연동 시뮬레이션 완료 알림)
-function submitEditForm(event) {
-    event.preventDefault(); // 기본 submit 페이지 새로고침 방지
-    
-    const chartId = $('#edit_id').val();
-    const updatedDiagnosis = $('#edit_diagnosis').val();
-    
-    // 실제 운영 시 이 시점에 $.ajax나 $.post를 활용해 DB 업데이트 처리(SQL UPDATE)를 수행합니다.
-    alert(`[보안 인증 서명 완료]\n차트번호 [ ${chartId} ]의 진단명('${updatedDiagnosis}') 외 기록 정정이 성공적으로 저장되었습니다.\n\n(※ 현재는 모크데이터 환경이므로 페이지 새로고침 시 초기화됩니다.)`);
-    
-    closeEditModal();
-}
+// ================= [3] 우분투 MySQL AJAX 비동기 전송 처리 =================
+$(document).ready(function() {
+    $('#editChartForm').on('submit', function(event) {
+        event.preventDefault();
+        
+        const chartNo = $('#edit_id').val();
+        const updatedDiagnosis = $('#edit_diagnosis').val();
+        const updatedPrescription = $('#edit_prescription').val();
+        const updatedNotes = $('#edit_notes').val();
+        
+        $.ajax({
+            url: 'chart_update.php',
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                chart_no: chartNo,
+                diagnosis: updatedDiagnosis,
+                prescription: updatedPrescription,
+                notes: updatedNotes
+            },
+            success: function(response) {
+                if (response.success) {
+                    const targetRow = $(`tr[data-id="${chartNo}"]`);
+                    targetRow.find('td').eq(6).text(updatedDiagnosis);
+                    targetRow.find('td').eq(7).text(updatedPrescription);
+                    targetRow.find('td').eq(8).text(updatedNotes);
+
+                    alert(`[보안 서명 및 우분투 DB 반영 완료]\n차트번호 [ ${chartNo} ]의 기록 정정이 처리되었습니다.`);
+                    closeEditModal();
+                } else {
+                    alert('저장 실패: ' + response.message);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error(xhr.responseText);
+                alert('서버 통신 중 오류가 발생했습니다. DB 연동 상태를 점검하세요.');
+            }
+        });
+    });
+});

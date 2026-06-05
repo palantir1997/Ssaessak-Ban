@@ -35,7 +35,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 <div class="space-y-1">
                     <a href="DashBoard.php" class="flex items-center gap-3 px-4 py-2.5 text-gray-600 hover:bg-gray-100 rounded-lg"><i data-lucide="activity" class="w-4 h-4"></i> 대시보드</a>
                     <a href="reception.php" class="flex items-center gap-3 px-4 py-2.5 text-gray-600 hover:bg-gray-100 rounded-lg"><i data-lucide="user-plus" class="w-4 h-4"></i> 접수/예약</a>
-                    <a href="chart.php" class="flex items-center gap-3 px-4 py-2.5 text-gray-600 hover:bg-gray-100 rounded-lg"><i data-lucide="file-text" class="w-4 h-4"></i> 진료 기록/차트</a>
+                    <a href="medical_record.php" class="flex items-center gap-3 px-4 py-2.5 text-gray-600 hover:bg-gray-100 rounded-lg"><i data-lucide="file-text" class="w-4 h-4"></i> 진료 기록/차트</a>
                 </div>
             </div>
 
