@@ -78,7 +78,6 @@ function get_status_color($status) {
                     <option value="">직책 선택</option>
                     <option value="의사">의사</option>
                     <option value="간호사">간호사</option>
-                    <option value="행정직">행정직</option>
                 </select>
             </div>
             <div>
