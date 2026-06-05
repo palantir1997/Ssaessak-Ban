@@ -57,6 +57,16 @@ $logs = [];
 while($row = mysqli_fetch_assoc($result)){ 
     $logs[] = $row; 
 }
+
+// [디버깅용] 현재 login_attempts 테이블 데이터 확인
+$debug_q = mysqli_query($conn, "SELECT ip_address, COUNT(*) as count FROM login_attempts GROUP BY ip_address");
+echo "<div style='background:#eee; padding:10px; margin-bottom:10px;'>";
+echo "<strong>현재 IP별 실패 횟수:</strong><br>";
+while($row = mysqli_fetch_assoc($debug_q)) {
+    echo $row['ip_address'] . " : " . $row['count'] . "회<br>";
+}
+echo "</div>";
+
 ?>
 
 
