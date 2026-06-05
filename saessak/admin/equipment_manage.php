@@ -9,9 +9,9 @@ include './include/header.php';
 <?php
 
 // 2. 이 페이지 전용 DB 연결 (방금 만든 우분투 계정 사용!)
-$db_host = '172.16.11.222';
-$db_user = 'root';
-$db_pass = '';
+$db_host = '175.210.161.42';
+$db_user = 'DH';
+$db_pass = '1234';
 $db_name = 'saessak';
 
 // mysqli 연결 생성 (변수명을 $conn으로 고정)
@@ -26,10 +26,49 @@ if (!$conn) {
     // 연결 성공 시 한글 깨짐 방지 설정
     mysqli_set_charset($conn, 'utf8mb4');
 
+
+    // 3-1. [UPDATE] 상태 변경 처리
+    if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['change_status'])) {
+        $equipment_no = mysqli_real_escape_string($conn, $_POST['equipment_no']);
+        $new_status = mysqli_real_escape_string($conn, $_POST['new_status']);
+
+        $sql_update_status = "UPDATE medical_equipments 
+                              SET status = '$new_status' 
+                              WHERE equipment_no = '$equipment_no'";
+
+        if (mysqli_query($conn, $sql_update_status)) {
+            echo "<script>alert('상태가 변경되었습니다.'); location.href='equipment_manage.php';</script>";
+            exit();
+        } else {
+            echo "<script>alert('상태 변경 오류: " . mysqli_error($conn) . "');</script>";
+        }
+    }
+
+    // 3-2. [UPDATE] 수리 기록 처리
+    if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_repair_log'])) {
+        $equipment_no = mysqli_real_escape_string($conn, $_POST['equipment_no']);
+        $repair_memo = mysqli_real_escape_string($conn, $_POST['repair_memo']);
+        $today = date('Y-m-d');
+
+        $sql_update_repair = "UPDATE medical_equipments 
+                              SET maintenance_memo = CONCAT(IFNULL(maintenance_memo, ''), '\n[$today] ', '$repair_memo'),
+                                  last_check_date = '$today',
+                                  status = '수리 중'
+                              WHERE equipment_no = '$equipment_no'";
+
+        if (mysqli_query($conn, $sql_update_repair)) {
+            echo "<script>alert('수리 기록이 추가되었습니다.'); location.href='equipment_manage.php';</script>";
+            exit();
+        } else {
+            echo "<script>alert('수리 기록 오류: " . mysqli_error($conn) . "');</script>";
+        }
+    }
+
    // 3. [INSERT] 신규 장비 폼 제출 처리
 if ($_SERVER["REQUEST_METHOD"] == "POST" && !empty($_POST['equipment_name'])) {
     $equipment_no = mysqli_real_escape_string($conn, $_POST['equipment_no']);
     
+
     // ⭐ 여기 추가: 중복 체크!
     $check_query = "SELECT * FROM medical_equipments WHERE equipment_no = '$equipment_no'";
     $check_result = mysqli_query($conn, $check_query);
@@ -175,8 +214,16 @@ function get_equip_status_color($status) {
                     </td>
                     <td class="px-6 py-4">
                         <div class="flex gap-2">
-                            <button class="px-3 py-1 text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors">수리 기록</button>
-                            <button class="px-3 py-1 text-xs font-medium bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg transition-colors">상태 변경</button>
+                            <button type="button"
+                                onclick="openRepairModal('<?php echo htmlspecialchars($equip['equipment_no']); ?>')"
+                                class="px-3 py-1 text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors">
+                                수리 기록
+                            </button>
+                            <button type="button"
+                                onclick="openStatusModal('<?php echo htmlspecialchars($equip['equipment_no']); ?>', '<?php echo htmlspecialchars($equip['status']); ?>')"
+                                class="px-3 py-1 text-xs font-medium bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg transition-colors">
+                                상태 변경
+                            </button>
                         </div>
                     </td>
                 </tr>
@@ -192,6 +239,73 @@ function get_equip_status_color($status) {
         </table>
     </div>
 </div>
+
+
+<!-- 수리 기록 모달 -->
+<div id="repairModal" class="hidden fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+    <div class="bg-white rounded-xl p-6 w-full max-w-md">
+        <h3 class="text-lg font-bold mb-4">수리 기록 추가</h3>
+        <form method="POST">
+            <input type="hidden" id="repair_equipment_no" name="equipment_no">
+            <textarea name="repair_memo" required rows="4"
+                class="w-full border border-gray-200 rounded-lg p-3 text-sm"
+                placeholder="수리/점검 내용을 입력하세요."></textarea>
+
+            <div class="flex justify-end gap-2 mt-4">
+                <button type="button" onclick="closeRepairModal()"
+                    class="px-4 py-2 bg-gray-100 rounded-lg text-sm">취소</button>
+                <button type="submit" name="add_repair_log"
+                    class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm">저장</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 상태 변경 모달 -->
+<div id="statusModal" class="hidden fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+    <div class="bg-white rounded-xl p-6 w-full max-w-md">
+        <h3 class="text-lg font-bold mb-4">장비 상태 변경</h3>
+        <form method="POST">
+            <input type="hidden" id="status_equipment_no" name="equipment_no">
+
+            <select id="new_status" name="new_status"
+                class="w-full border border-gray-200 rounded-lg p-3 text-sm">
+                <option value="사용 가능">사용 가능</option>
+                <option value="사용 중">사용 중</option>
+                <option value="수리 중">수리 중</option>
+                <option value="폐기">폐기</option>
+            </select>
+
+            <div class="flex justify-end gap-2 mt-4">
+                <button type="button" onclick="closeStatusModal()"
+                    class="px-4 py-2 bg-gray-100 rounded-lg text-sm">취소</button>
+                <button type="submit" name="change_status"
+                    class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm">변경</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function openRepairModal(equipmentNo) {
+    document.getElementById('repair_equipment_no').value = equipmentNo;
+    document.getElementById('repairModal').classList.remove('hidden');
+}
+
+function closeRepairModal() {
+    document.getElementById('repairModal').classList.add('hidden');
+}
+
+function openStatusModal(equipmentNo, currentStatus) {
+    document.getElementById('status_equipment_no').value = equipmentNo;
+    document.getElementById('new_status').value = currentStatus;
+    document.getElementById('statusModal').classList.remove('hidden');
+}
+
+function closeStatusModal() {
+    document.getElementById('statusModal').classList.add('hidden');
+}
+</script>
 
 <?php // include './include/footer.php'; 
 ?>

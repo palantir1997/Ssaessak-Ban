@@ -1,9 +1,9 @@
 <?php
 include 'include/header.php';
 
-$db_host = '172.16.11.222'; 
-$db_user = 'root'; 
-$db_pass = '';         
+$db_host = '175.210.161.42'; 
+$db_user = 'DH'; 
+$db_pass = '12234';         
 $db_name = 'saessak';      
 
 $conn = mysqli_connect($db_host, $db_user, $db_pass, $db_name);
