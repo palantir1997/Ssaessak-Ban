@@ -99,7 +99,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !empty($_POST['equipment_name'])) {
 }
 
     // 4. [SELECT] DB에서 장비 목록 불러오기
-    $sql_select = "SELECT * FROM medical_equipments ORDER BY created_at DESC";
+    $sql_select = "SELECT equipment_no,
+                          equipment_name,
+                          category,
+                          purchase_date,
+                          last_check_date,
+                          status,
+                          maintenance_memo,
+                          created_at
+                   FROM medical_equipments
+                   ORDER BY created_at DESC";
     $result_equip = mysqli_query($conn, $sql_select);
 }
 
@@ -215,18 +224,30 @@ function get_equip_status_color($status) {
                     <td class="px-6 py-4">
                         <div class="flex gap-2">
                             <button type="button"
-                                onclick="openRepairModal('<?php echo htmlspecialchars($equip['equipment_no']); ?>')"
+                                onclick='openRepairModal(<?php echo json_encode($equip["equipment_no"], JSON_UNESCAPED_UNICODE); ?>, <?php echo json_encode($equip["maintenance_memo"] ?? "", JSON_UNESCAPED_UNICODE); ?>)'
                                 class="px-3 py-1 text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors">
                                 수리 기록
                             </button>
                             <button type="button"
-                                onclick="openStatusModal('<?php echo htmlspecialchars($equip['equipment_no']); ?>', '<?php echo htmlspecialchars($equip['status']); ?>')"
+                                onclick='openStatusModal(<?php echo json_encode($equip["equipment_no"], JSON_UNESCAPED_UNICODE); ?>, <?php echo json_encode($equip["status"], JSON_UNESCAPED_UNICODE); ?>)'
                                 class="px-3 py-1 text-xs font-medium bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg transition-colors">
                                 상태 변경
                             </button>
                         </div>
                     </td>
                 </tr>
+                <?php if (isset($equip['maintenance_memo']) && trim($equip['maintenance_memo']) !== ''): ?>
+                <tr style="background:#f9fafb;">
+                    <td colspan="6" class="px-6 py-4">
+                        <div style="background:#ffffff; border:1px solid #e5e7eb; border-radius:10px; padding:14px;">
+                            <p class="text-xs font-bold text-gray-500 mb-2">수리/점검 기록</p>
+                            <div style="white-space:pre-wrap; word-break:break-word; line-height:1.7; color:#374151; font-size:13px;">
+                                <?php echo nl2br(htmlspecialchars($equip['maintenance_memo'])); ?>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                <?php endif; ?>
                 <?php 
                     endwhile; 
                 else: 
@@ -247,9 +268,19 @@ function get_equip_status_color($status) {
         <h3 class="text-lg font-bold mb-4">수리 기록 추가</h3>
         <form method="POST">
             <input type="hidden" id="repair_equipment_no" name="equipment_no">
+
+            <div class="mb-4">
+                <p class="text-xs font-bold text-gray-500 mb-1">기존 수리/점검 기록</p>
+                <div id="repair_history_view"
+                    class="min-h-[80px] max-h-48 overflow-y-auto whitespace-pre-wrap break-words bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm text-gray-700">
+                    등록된 수리 기록이 없습니다.
+                </div>
+            </div>
+
+            <p class="text-xs font-bold text-gray-500 mb-1">새 수리/점검 기록 추가</p>
             <textarea name="repair_memo" required rows="4"
                 class="w-full border border-gray-200 rounded-lg p-3 text-sm"
-                placeholder="수리/점검 내용을 입력하세요."></textarea>
+                placeholder="추가할 수리/점검 내용을 입력하세요."></textarea>
 
             <div class="flex justify-end gap-2 mt-4">
                 <button type="button" onclick="closeRepairModal()"
@@ -287,8 +318,16 @@ function get_equip_status_color($status) {
 </div>
 
 <script>
-function openRepairModal(equipmentNo) {
+function openRepairModal(equipmentNo, currentMemo) {
     document.getElementById('repair_equipment_no').value = equipmentNo;
+
+    const historyBox = document.getElementById('repair_history_view');
+    if (currentMemo && currentMemo.trim() !== '') {
+        historyBox.textContent = currentMemo;
+    } else {
+        historyBox.textContent = '등록된 수리 기록이 없습니다.';
+    }
+
     document.getElementById('repairModal').classList.remove('hidden');
 }
 
