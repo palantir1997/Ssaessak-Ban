@@ -346,48 +346,47 @@ include_once 'includes/header.php';
                     </div>
                 </div>
 
-                <form id="booking-form" onsubmit="if(!IS_LOGGED_IN) { event.preventDefault(); alert('🚨 로그인 후 사용이 가능합니다. 로그인 또는 회원가입을 진행해 주세요.'); toggleAuthModal('login'); return false; }" class="p-6 sm:p-10 space-y-6">
+                <form id="booking-form" action="includes/booking_process.php" method="POST" onsubmit="if(!IS_LOGGED_IN) { event.preventDefault(); alert('🚨 로그인 후 사용이 가능합니다.'); toggleAuthModal('login'); return false; }" class="p-6 sm:p-10 space-y-6">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                         <div>
                             <label class="block text-xs font-bold text-gray-500 mb-2">환자 성함</label>
-                            <input type="text" required placeholder="성함을 입력하세요" class="w-full px-4 py-3.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-sprout-500 bg-gray-50/50">
+                            <input type="text" name="patient_name" required placeholder="성함을 입력하세요" class="w-full px-4 py-3.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-sprout-500 bg-gray-50/50">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-gray-500 mb-2">비상 연락처</label>
-                            <input type="tel" required placeholder="010-0000-0000" class="w-full px-4 py-3.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-sprout-500 bg-gray-50/50">
+                            <input type="tel" name="phone" required placeholder="010-0000-0000" class="w-full px-4 py-3.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-sprout-500 bg-gray-50/50">
                         </div>
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
                         <div>
                             <label class="block text-xs font-bold text-gray-500 mb-2">희망 진료 과목</label>
-                            <select id="book-dept" required class="w-full px-4 py-3.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-sprout-500 bg-gray-50/50">
+                            <select name="dept" id="book-dept" required class="w-full px-4 py-3.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-sprout-500 bg-gray-50/50">
                                 <option value="" disabled selected>선택해 주세요</option>
                                 <option value="호흡기내과">호흡기내과 (김주은 원장)</option>
                                 <option value="소화기내과">소화기내과 (박건우 과장)</option>
                                 <option value="정형외과">정형외과 (최시환 과장)</option>
                                 <option value="신경과">신경과 (김유진 과장)</option>
-                                <!-- <option value="종합검진센터">종합검진센터 (한무진 소장)</option> -->
                             </select>
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-gray-500 mb-2">진료 희망일</label>
-                            <input type="date" id="book-date" required class="w-full px-4 py-3.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-sprout-500 bg-gray-50/50">
+                            <input type="date" name="date" id="book-date" required class="w-full px-4 py-3.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-sprout-500 bg-gray-50/50">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-gray-500 mb-2">희망 시간대</label>
-                            <select required class="w-full px-4 py-3.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-sprout-500 bg-gray-50/50">
+                            <select name="time" required class="w-full px-4 py-3.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-sprout-500 bg-gray-50/50">
                                 <option value="" disabled selected>시간대 선택</option>
-                                <option value="오전 (09:00 ~ 12:30)">오전 (09:00 ~ 12:30)</option>
-                                <option value="오후 (14:00 ~ 17:30)">오후 (14:00 ~ 17:30)</option>
-                                <option value="야간연장 (18:00 ~ 19:40)">야간연장 (화/목 전용)</option>
+                                <option value="09:00">오전 (09:00 ~ 12:30)</option>
+                                <option value="14:00">오후 (14:00 ~ 17:30)</option>
+                                <option value="18:00">야간연장 (화/목 전용)</option>
                             </select>
                         </div>
                     </div>
 
                     <div>
                         <label class="block text-xs font-bold text-gray-500 mb-2">증상 요약 및 전달사항 (선택)</label>
-                        <textarea rows="3" placeholder="내원 목적이나 앓고 계신 증상을 간단히 메모해 주시면 진료에 큰 도움이 됩니다." class="w-full px-4 py-3.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-sprout-500 bg-gray-50/50 resize-none"></textarea>
+                        <textarea name="memo" rows="3" placeholder="내원 목적이나 앓고 계신 증상을 간단히 메모해 주시면 진료에 큰 도움이 됩니다." class="w-full px-4 py-3.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-sprout-500 bg-gray-50/50 resize-none"></textarea>
                     </div>
 
                     <div class="bg-gray-50 p-4 rounded-xl flex items-start gap-3">
