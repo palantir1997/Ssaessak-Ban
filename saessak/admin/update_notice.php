@@ -1,6 +1,6 @@
 <?php
 // admin/update_notice.php
-include '../includes/db.php';
+include './includes/db.php';
 
 $no = $_POST['no'];
 $title = mysqli_real_escape_string($conn, $_POST['title']);
