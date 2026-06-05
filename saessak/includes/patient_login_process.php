@@ -24,13 +24,33 @@ if ($conn) {
 }
 
 if ($login_success) {
-    $_SESSION['patient_id'] = $patient_id;
+    $_SESSION['patient_id']       = $patient_id;
     $_SESSION['patient_login_id'] = $login_id;
-    $_SESSION['patient_name'] = $patient_name;
-    $_SESSION['login_type'] = 'patient';
+    $_SESSION['patient_name']     = $patient_name;
+    $_SESSION['login_type']       = 'patient';
     echo "<script>alert('✅ {$patient_name}님 로그인되었습니다.'); location.href='../index.php';</script>";
     exit();
+
 } else {
+    // login_attempts 테이블 생성
+    mysqli_query($conn, "
+        CREATE TABLE IF NOT EXISTS login_attempts (
+            id           INT AUTO_INCREMENT PRIMARY KEY,
+            ip_address   VARCHAR(45),
+            user_id      VARCHAR(100),
+            attempt_time DATETIME DEFAULT CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB;
+    ");
+
+    $user_ip = $_SERVER['REMOTE_ADDR'];
+    if ($user_ip === '::1') $user_ip = '127.0.0.1';
+
+    // 실패한 IP + 시도한 아이디 기록
+    $fail_stmt = mysqli_prepare($conn, "INSERT INTO login_attempts (ip_address, user_id) VALUES (?, ?)");
+    mysqli_stmt_bind_param($fail_stmt, 'ss', $user_ip, $login_id);
+    mysqli_stmt_execute($fail_stmt);
+    mysqli_stmt_close($fail_stmt);
+
     echo "<script>alert('❌ 로그인 실패\\nID 또는 비밀번호를 확인해주세요.'); history.back();</script>";
     exit();
 }
