@@ -39,7 +39,7 @@ mysqli_stmt_bind_param($stmt, 'ssss', $name, $login_id, $password, $phone);
 
 if (mysqli_stmt_execute($stmt)) {
     $new_id = mysqli_insert_id($conn);
-    echo "<script>alert('회원가입 완료! DB ID: ' + $new_id); location.href='../index.php';</script>";
+    echo "<script>alert('회원가입 완료! DB ID: $new_id'); location.href='../index.php';</script>";
 } else {
     $error = mysqli_stmt_error($stmt);
     $errno = mysqli_stmt_errno($stmt);
