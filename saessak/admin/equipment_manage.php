@@ -64,6 +64,45 @@ if (!$conn) {
         }
     }
 
+    // 3-3. [UPDATE] 수리 기록 개별 삭제 처리
+    if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_repair_log'])) {
+        $equipment_no = mysqli_real_escape_string($conn, $_POST['equipment_no']);
+        $repair_index = isset($_POST['repair_index']) ? intval($_POST['repair_index']) : -1;
+
+        $sql_get_memo = "SELECT maintenance_memo FROM medical_equipments WHERE equipment_no = '$equipment_no' LIMIT 1";
+        $result_memo = mysqli_query($conn, $sql_get_memo);
+
+        if ($result_memo && mysqli_num_rows($result_memo) > 0) {
+            $memo_row = mysqli_fetch_assoc($result_memo);
+            $memo_lines = preg_split("/\r\n|\r|\n/", $memo_row['maintenance_memo'] ?? '');
+
+            $memo_lines = array_values(array_filter($memo_lines, function($line) {
+                return trim($line) !== '';
+            }));
+
+            if ($repair_index >= 0 && isset($memo_lines[$repair_index])) {
+                unset($memo_lines[$repair_index]);
+                $new_memo = implode("\n", array_values($memo_lines));
+                $new_memo_escaped = mysqli_real_escape_string($conn, $new_memo);
+
+                $sql_delete_repair = "UPDATE medical_equipments 
+                                      SET maintenance_memo = '$new_memo_escaped'
+                                      WHERE equipment_no = '$equipment_no'";
+
+                if (mysqli_query($conn, $sql_delete_repair)) {
+                    echo "<script>alert('수리 기록이 삭제되었습니다.'); location.href='equipment_manage.php';</script>";
+                    exit();
+                } else {
+                    echo "<script>alert('수리 기록 삭제 오류: " . mysqli_error($conn) . "');</script>";
+                }
+            } else {
+                echo "<script>alert('삭제할 수리 기록을 찾을 수 없습니다.');</script>";
+            }
+        } else {
+            echo "<script>alert('장비 정보를 찾을 수 없습니다.');</script>";
+        }
+    }
+
    // 3. [INSERT] 신규 장비 폼 제출 처리
 if ($_SERVER["REQUEST_METHOD"] == "POST" && !empty($_POST['equipment_name'])) {
     $equipment_no = mysqli_real_escape_string($conn, $_POST['equipment_no']);
@@ -241,8 +280,32 @@ function get_equip_status_color($status) {
                     <td colspan="6" class="px-6 py-4">
                         <div style="background:#ffffff; border:1px solid #e5e7eb; border-radius:10px; padding:14px;">
                             <p class="text-xs font-bold text-gray-500 mb-2">수리/점검 기록</p>
-                            <div style="white-space:pre-wrap; word-break:break-word; line-height:1.7; color:#374151; font-size:13px;">
-                                <?php echo nl2br(htmlspecialchars($equip['maintenance_memo'])); ?>
+
+                            <?php
+                            $repair_lines = preg_split("/\r\n|\r|\n/", $equip['maintenance_memo']);
+                            $repair_lines = array_values(array_filter($repair_lines, function($line) {
+                                return trim($line) !== '';
+                            }));
+                            ?>
+
+                            <div class="space-y-2">
+                                <?php foreach ($repair_lines as $repair_index => $repair_line): ?>
+                                <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px; background:#f9fafb; border:1px solid #e5e7eb; border-radius:8px; padding:10px 12px;">
+                                    <div style="white-space:pre-wrap; word-break:break-word; line-height:1.7; color:#374151; font-size:13px;">
+                                        <?php echo htmlspecialchars($repair_line); ?>
+                                    </div>
+
+                                    <form method="POST" onsubmit="return confirm('이 수리 기록을 삭제할까요?');" style="margin:0;">
+                                        <input type="hidden" name="equipment_no" value="<?php echo htmlspecialchars($equip['equipment_no']); ?>">
+                                        <input type="hidden" name="repair_index" value="<?php echo $repair_index; ?>">
+                                        <button type="submit" name="delete_repair_log"
+                                            style="color:#ef4444; font-weight:bold; font-size:14px; line-height:1; padding:4px 6px; border-radius:6px;"
+                                            title="수리 기록 삭제">
+                                            ×
+                                        </button>
+                                    </form>
+                                </div>
+                                <?php endforeach; ?>
                             </div>
                         </div>
                     </td>
