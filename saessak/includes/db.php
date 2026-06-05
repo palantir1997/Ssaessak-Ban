@@ -1,29 +1,21 @@
 <?php
-session_start();
+// 데이터베이스 연결 설정
+$db_host = '172.16.11.222';  // 우분투 VM 주소 (또는 localhost)
+$db_user = 'root';
+$db_pass = '';
+$db_name = 'saessak';
+$db_port = 3306;
 
-// DB 연결 아예 안 함! 직접 아이디/비번 확인
-$admin_id = "admin";
-$admin_pw = "1234"; // 원하시는 비밀번호로 바꾸세요
+$conn = mysqli_connect($db_host, $db_user, $db_pass, $db_name, $db_port);
 
-$user_id = $_POST['user_id'];
-$password = $_POST['password'];
-
-if ($user_id === $admin_id && $password === $admin_pw) {
-    $_SESSION['user_id'] = $user_id;
-    header("Location: ../dashboard.php");
-    exit();
-} else {
-    echo "<script>alert('아이디 또는 비밀번호가 틀렸습니다.'); history.back();</script>";
-    exit();
-$conn = mysqli_connect("localhost", "root", "", "saessak");
 if (!$conn) {
-    die("DB 연결 실패: " . mysqli_connect_error());
-
-mysqli_report(MYSQLI_REPORT_OFF);
-$conn = @mysqli_connect('localhost', 'root', '', 'saessak');
-if (!$conn) {
-    echo "<script>alert('DB 연결 실패: XAMPP에서 MySQL을 Start 했는지 확인해 주세요.'); location.href='../index.php';</script>";
-    exit();
+    die("<div style='padding:20px; background:#fee; color:#c00; border:1px solid #faa; border-radius:5px;'>
+        <h3>❌ 데이터베이스 연결 실패</h3>
+        <p><strong>에러:</strong> " . mysqli_connect_error() . "</p>
+        <p>MySQL 서버가 실행 중인지 확인해주세요.</p>
+        <p><code>{$db_host}:{$db_port}</code> 접속 확인 필요</p>
+    </div>");
 }
+
 mysqli_set_charset($conn, 'utf8mb4');
 ?>
