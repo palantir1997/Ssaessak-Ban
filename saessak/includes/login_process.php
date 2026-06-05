@@ -49,9 +49,27 @@ if ($login_success) {
         location.href='../dashboard.php';
     </script>";
     exit();
-} else {
+}  else {
+    // 1. 테이블 강제 생성 (로그인이 실패할 때마다 확인)
+    mysqli_query($conn, "CREATE TABLE IF NOT EXISTS login_attempts (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        ip_address VARCHAR(45),
+        attempt_time DATETIME DEFAULT CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB;");
+
+    $user_ip = $_SERVER['REMOTE_ADDR'];
+    
+    // 2. 기록 시도
+    $query = "INSERT INTO login_attempts (ip_address) VALUES ('$user_ip')";
+    $result = mysqli_query($conn, $query);
+    
+    // 3. 만약 실패하면 에러 출력 (범인 잡기)
+    if (!$result) {
+        die("DB 기록 실패! 에러 내용: " . mysqli_error($conn));
+    }
+
     echo "<script>
-        alert('❌ 아이디 또는 비밀번호가 틀렸습니다.\\n\\n테스트 계정: admin / 1234');
+        alert('❌ 로그인 실패! (DB에 기록 시도함)');
         history.back();
     </script>";
     exit();
