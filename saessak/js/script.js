@@ -81,9 +81,7 @@ function validateSignupForm() {
         return false;
     }
     
-    alert("🎉 회원가입이 정상 완료되었습니다! 가입하신 정보로 로그인을 진행해 주세요.");
-    toggleAuthModal('login');
-    return false; 
+    return true; // ← 이렇게 바꾸면 폼이 signup_process.php로 정상 전송됨
 }
 
 // 회원 통합 팝업 제어 
