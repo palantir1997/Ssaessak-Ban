@@ -49,9 +49,27 @@ if ($login_success) {
         location.href='../dashboard.php';
     </script>";
     exit();
-} else {
+}  else {
+    $user_ip = $_SERVER['REMOTE_ADDR'];
+    
+    // 1. 실패 기록 저장
+    mysqli_query($conn, "INSERT INTO login_attempts (ip_address) VALUES ('$user_ip')");
+    
+    // 2. 최근 5분간 이 IP의 실패 횟수 조회
+    $check_query = mysqli_query($conn, "SELECT COUNT(*) as cnt FROM login_attempts 
+                                        WHERE ip_address = '$user_ip' 
+                                        AND attempt_time > NOW() - INTERVAL 5 MINUTE");
+    $attempt_data = mysqli_fetch_assoc($check_query);
+    $fail_count = $attempt_data['cnt'];
+    
+    // 3. 정확히 5회째에만 보안 로그에 1번 기록 (혹은 5회 이상이면 계속 기록)
+    if ($fail_count == 5) {
+        mysqli_query($conn, "INSERT INTO intrusion_logs (detection_time, attack_type, source_ip, country, user_id, risk_level, status) 
+                             VALUES (NOW(), 'Brute Force Attempt (5회 실패)', '$user_ip', 'Korea', '$user_id', '고위험', '처리대기')");
+    }
+
     echo "<script>
-        alert('❌ 아이디 또는 비밀번호가 틀렸습니다.\\n\\n테스트 계정: admin / 1234');
+        alert('❌ 아이디 또는 비밀번호가 틀렸습니다. (현재 실패 횟수: " . $fail_count . "회)');
         history.back();
     </script>";
     exit();
