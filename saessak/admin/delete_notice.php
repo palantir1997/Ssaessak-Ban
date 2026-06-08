@@ -1,6 +1,10 @@
 <?php
 include 'include/db.php';
 $no = $_GET['no'];
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+include 'include/db.php';
 
 $query = "DELETE FROM notices WHERE notice_no = '$no'";
 if (mysqli_query($conn, $query)) {

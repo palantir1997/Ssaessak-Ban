@@ -1,13 +1,17 @@
 <?php
 // admin/update_notice.php
-include './includes/db.php';
+include 'include/db.php';
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
-$no = $_POST['no'];
-$title = mysqli_real_escape_string($conn, $_POST['title']);
-$content = mysqli_real_escape_string($conn, $_POST['content']); // 추가
+include 'include/db.php';
 
-// [수정 포인트] SET 뒤에 content = '$content'를 추가했습니다
-$query = "UPDATE notices SET title = '$title', content = '$content' WHERE notice_no = '$no'";
+$no       = mysqli_real_escape_string($conn, $_POST['no']);
+$title    = mysqli_real_escape_string($conn, $_POST['title']);
+$content  = mysqli_real_escape_string($conn, $_POST['content']);
+$category = mysqli_real_escape_string($conn, $_POST['category']);
+
+$query = "UPDATE notices SET title = '$title', content = '$content', category = '$category' WHERE notice_no = '$no'";
 
 if (mysqli_query($conn, $query)) {
     echo "<script>alert('수정되었습니다.'); location.href='notice.php';</script>";

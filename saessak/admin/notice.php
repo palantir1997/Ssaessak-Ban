@@ -1,15 +1,7 @@
 <?php
 include 'include/header.php';
 
-// 1. 디버깅 및 에러 출력 강제 활성화
-/*
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
-*/
-
 try {
-
     $db_host = '172.16.11.210'; 
     $db_user = 'root';
     $db_pass = ''; 
@@ -38,14 +30,14 @@ try {
 // [1] 공지사항 등록 (INSERT 로직)
 // ==========================================
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $category   = mysqli_real_escape_string($conn, trim($_POST['category'] ?? ''));
-    $title      = mysqli_real_escape_string($conn, trim($_POST['title'] ?? ''));
-    $content    = mysqli_real_escape_string($conn, trim($_POST['content'] ?? ''));
+    $category    = mysqli_real_escape_string($conn, trim($_POST['category'] ?? ''));
+    $title       = mysqli_real_escape_string($conn, trim($_POST['title'] ?? ''));
+    $content     = mysqli_real_escape_string($conn, trim($_POST['content'] ?? ''));
     $is_important = isset($_POST['important']) ? 1 : 0;
     $author_name = 'Admin'; 
 
     if (!empty($category) && !empty($title) && !empty($content)) {
-        $notice_no = 'NT-' . date('YmdHis') . rand(10, 99);
+        $notice_no  = 'NT-' . date('YmdHis') . rand(10, 99);
         $created_at = date('Y-m-d');
 
         $insert_query = "
@@ -127,17 +119,38 @@ function get_category_color($category) {
                     <th class="px-6 py-4 font-medium">제목</th>
                     <th class="px-6 py-4 font-medium">작성자</th>
                     <th class="px-6 py-4 font-medium">작성일</th>
+                    <th class="px-6 py-4 font-medium">관리</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
                 <?php if (empty($notices)): ?>
-                <tr><td colspan="4" class="px-6 py-8 text-center text-gray-400">등록된 공지사항이 없습니다.</td></tr>
+                <tr><td colspan="5" class="px-6 py-8 text-center text-gray-400">등록된 공지사항이 없습니다.</td></tr>
                 <?php else: foreach ($notices as $notice): ?>
-                <tr>
-                    <td class="px-6 py-4"><span class="px-3 py-1 rounded-full text-xs font-bold border <?php echo get_category_color($notice['category']); ?>"><?php echo htmlspecialchars($notice['category']); ?></span></td>
-                    <td class="px-6 py-4 font-medium text-gray-800"><?php echo htmlspecialchars($notice['title']); ?></td>
+                <tr class="hover:bg-gray-50 transition">
+                    <td class="px-6 py-4">
+                        <span class="px-3 py-1 rounded-full text-xs font-bold border <?php echo get_category_color($notice['category']); ?>">
+                            <?php echo htmlspecialchars($notice['category']); ?>
+                        </span>
+                    </td>
+                    <!-- 제목 클릭 → 상세/수정 페이지 이동 -->
+                    <td class="px-6 py-4 font-medium text-gray-800">
+                        <a href="edit_notice.php?no=<?php echo urlencode($notice['notice_no']); ?>" 
+                           class="hover:text-blue-600 hover:underline cursor-pointer">
+                            <?php if ($notice['is_important']): ?>
+                                <span class="text-red-500 font-bold mr-1">[중요]</span>
+                            <?php endif; ?>
+                            <?php echo htmlspecialchars($notice['title']); ?>
+                        </a>
+                    </td>
                     <td class="px-6 py-4 text-gray-600"><?php echo htmlspecialchars($notice['author_name']); ?></td>
                     <td class="px-6 py-4 text-gray-500"><?php echo htmlspecialchars($notice['created_at']); ?></td>
+                    <td class="px-6 py-4">
+                        <a href="delete_notice.php?no=<?php echo urlencode($notice['notice_no']); ?>" 
+                           onclick="return confirm('정말 삭제하시겠습니까?')"
+                           class="text-red-500 hover:text-red-700 text-xs font-bold border border-red-200 px-3 py-1 rounded-lg hover:bg-red-50 transition">
+                            삭제
+                        </a>
+                    </td>
                 </tr>
                 <?php endforeach; endif; ?>
             </tbody>
