@@ -4,7 +4,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     die("<script>alert('접근 권한이 없습니다.'); history.back();</script>");
 }
 
-$db_host = '172.16.11.222';
+$db_host = '172.16.11.210';
 $db_user = 'root';
 $db_pass = '';
 $db_name = 'saessak';
@@ -85,7 +85,7 @@ if ($tool === 'db_integrity' && $conn) {
 
 // 4. 포트 점검
 if ($tool === 'port_scan') {
-    $host = '172.16.11.222';
+    $host = '172.16.11.210';
     $ports = [
         80   => 'HTTP',
         443  => 'HTTPS',

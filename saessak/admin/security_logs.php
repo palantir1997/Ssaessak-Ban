@@ -4,7 +4,7 @@ include 'include/header.php';
 // 데이터베이스 연결
 try {
 
-    $db_host = '172.16.11.222';
+    $db_host = '172.16.11.210';
     $db_user = 'root';
     $db_pass = '';
     $db_name = 'saessak';

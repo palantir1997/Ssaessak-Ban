@@ -7,7 +7,7 @@ ini_set('display_errors', 1);
 // ==========================================
 // 1. DB 연결
 // ==========================================
-$conn = mysqli_connect('172.16.11.222', 'root', '', 'saessak', 3306);
+$conn = mysqli_connect('172.16.11.210', 'root', '', 'saessak', 3306);
 if (!$conn) {
     die("DB 연결 실패: " . mysqli_connect_error());
 }

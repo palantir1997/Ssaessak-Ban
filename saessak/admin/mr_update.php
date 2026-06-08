@@ -3,9 +3,9 @@
 header('Content-Type: application/json; charset=utf-8');
 
 // 1. 우분투 MySQL DB 연결 설정
-$db_host = '192.168.45.213'; 
-$db_user = 'hj';   
-$db_pass = '1234'; 
+$db_host = '172.16.11.210'; 
+$db_user = 'root';   
+$db_pass = ''; 
 $db_name = 'saessak';   
 
 try {

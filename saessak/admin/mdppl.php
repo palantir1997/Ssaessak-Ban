@@ -2,7 +2,7 @@
 include 'include/header.php';
 
 
-$db_host = '172.16.11.222'; 
+$db_host = '172.16.11.210'; 
 $db_user = 'root';
 $db_pass = ''; // MySQL 비밀번호가 있다면 여기에 입력하세요
 $db_name = 'saessak'; 
