@@ -12,8 +12,30 @@ if (empty($name) || empty($login_id) || empty($password) || empty($phone)) {
     exit();
 }
 
+// ✅ 패스워드 정책 검증 추가
+if (strlen($password) < 8) {
+    echo "<script>alert('비밀번호는 8자 이상이어야 합니다.'); history.back();</script>";
+    exit();
+}
+if (!preg_match('/[A-Z]/', $password)) {
+    echo "<script>alert('비밀번호에 대문자를 포함해야 합니다.'); history.back();</script>";
+    exit();
+}
+if (!preg_match('/[a-z]/', $password)) {
+    echo "<script>alert('비밀번호에 소문자를 포함해야 합니다.'); history.back();</script>";
+    exit();
+}
+if (!preg_match('/[0-9]/', $password)) {
+    echo "<script>alert('비밀번호에 숫자를 포함해야 합니다.'); history.back();</script>";
+    exit();
+}
+if (!preg_match('/[!@#$%^&*()_+\-=\[\]{};\':\\|,.<>\/?]/', $password)) {
+    echo "<script>alert('비밀번호에 특수문자를 포함해야 합니다.'); history.back();</script>";
+    exit();
+}
+
 if (!$conn) {
-    echo "<script>alert('DB 연결 실패'); history.back();</script>";
+    echo "<script>alert('연결 실패'); history.back();</script>";
     exit();
 }
 
@@ -38,12 +60,9 @@ if (!$stmt) {
 mysqli_stmt_bind_param($stmt, 'ssss', $name, $login_id, $password, $phone);
 
 if (mysqli_stmt_execute($stmt)) {
-    $new_id = mysqli_insert_id($conn);
-    echo "<script>alert('회원가입 완료! DB ID: $new_id'); location.href='../index.php';</script>";
+    echo "<script>alert('회원가입 완료!'); location.href='../index.php';</script>";
 } else {
-    $error = mysqli_stmt_error($stmt);
-    $errno = mysqli_stmt_errno($stmt);
-    echo "<script>alert('INSERT 실패 / 에러번호: $errno / $error'); history.back();</script>";
+    echo "<script>alert('회원 가입 실패!'); history.back();</script>";
 }
 mysqli_stmt_close($stmt);
 ?>

@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/session_check.php'; 
 if (session_status() === PHP_SESSION_NONE) { session_start(); }
 ?>
 <!DOCTYPE html>
@@ -33,6 +34,8 @@ if (session_status() === PHP_SESSION_NONE) { session_start(); }
     </script>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+    <!-- ✅ reCAPTCHA 스크립트 -->
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
 <body class="bg-gray-50 text-gray-800 flex flex-col min-h-screen">
 
@@ -51,13 +54,11 @@ if (session_status() === PHP_SESSION_NONE) { session_start(); }
 
                 <nav class="hidden md:flex space-x-10 text-base font-semibold">
                     <div class="relative group py-6">
-                        <!-- 💻 PC용 메인 버튼 주소를 about.html로 연결했습니다 -->
                         <a href="html/about.html" class="text-gray-600 hover:text-sprout-600 transition-colors flex items-center gap-1">
                             병원소개
                             <svg class="w-4 h-4 text-gray-400 group-hover:text-sprout-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
                         </a>
                         <div class="absolute top-full left-1/2 -translate-x-1/2 w-48 bg-white border border-gray-100 rounded-2xl shadow-xl py-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform translate-y-2 group-hover:translate-y-0">
-                            <!-- 드롭다운 서브 메뉴들도 about.html 내의 ID 구역으로 정확히 지정했습니다 -->
                             <a href="html/about.html" class="block px-5 py-2.5 text-sm text-gray-600 hover:bg-sprout-50 hover:text-sprout-700">소개 및 이념</a>
                             <a href="html/about.html#organization" class="block px-5 py-2.5 text-sm text-gray-600 hover:bg-sprout-50 hover:text-sprout-700">병원 조직도</a>
                             <a href="index.php#doctors" class="block px-5 py-2.5 text-sm text-gray-600 hover:bg-sprout-50 hover:text-sprout-700">대표 의료진</a>
@@ -106,7 +107,6 @@ if (session_status() === PHP_SESSION_NONE) { session_start(); }
             <div class="space-y-1">
                 <span class="block px-3 py-1.5 text-[10px] font-bold text-gray-400 uppercase tracking-wider">Menu 리스트</span>
                 <div class="pl-2 space-y-1">
-                    <!-- 📱 모바일용 메뉴 버튼 주소도 about.html로 정확하게 타겟팅했습니다 -->
                     <a href="html/about.html" class="block px-3 py-2 rounded-lg text-gray-700 hover:bg-sprout-50 hover:text-sprout-600">소개 및 이념</a>
                     <a href="html/about.html#organization" class="block px-3 py-2 rounded-lg text-gray-700 hover:bg-sprout-50 hover:text-sprout-600">병원 조직도</a>
                     <a href="#doctors" class="block px-3 py-2 rounded-lg text-gray-700 hover:bg-sprout-50 hover:text-sprout-600">대표 의료진</a>
@@ -155,6 +155,8 @@ if (session_status() === PHP_SESSION_NONE) { session_start(); }
                         <input type="password" name="password" required placeholder="••••••••" class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-sprout-500">
                     </div>
                 </div>
+                <!-- ✅ reCAPTCHA 위젯 -->
+                <div class="g-recaptcha" data-sitekey="6LeTth8tAAAAAC68ZAD1knT4kWbk4LnkCZIl9s9S"></div>
                 <button type="submit" class="w-full bg-sprout-600 hover:bg-sprout-700 text-white font-bold py-3.5 rounded-xl text-sm shadow-md shadow-sprout-100 transition-all">접속 및 인증 가동</button>
                 <div class="text-center text-xs text-gray-400 pt-2">
                     아직 새싹병원 회원이 아니신가요? <button type="button" onclick="toggleAuthModal('signup')" class="text-sprout-600 font-bold underline">즉시 가입</button>

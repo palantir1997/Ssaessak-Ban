@@ -26,12 +26,12 @@ mysqli_stmt_bind_param($stmt, 'ssssss', $reception_no, $patient_name, $dept, $da
 
 if (mysqli_stmt_execute($stmt)) {
     echo "<script>
-        alert('✅ 예약이 완료되었습니다!\\n접수번호: $reception_no');
+        alert('✅ 예약이 완료되었습니다!');
         location.href='../index.php';
     </script>";
 } else {
     $err = mysqli_stmt_error($stmt);
-    echo "<script>alert('예약 실패: $err'); history.back();</script>";
+    echo "<script>alert('예약 실패!'); history.back();</script>";
 }
 mysqli_stmt_close($stmt);
 ?>
