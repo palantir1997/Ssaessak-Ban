@@ -1,0 +1,589 @@
+키사 유닉스 7-171페이지까지 쉘 스크립트
+
+# 1. 패키지 목록 업데이트
+sudo apt update
+
+# 2. vim 설치
+sudo apt install vim -y
+
+# 디렉토리 먼저 만들고
+sudo mkdir -p /opt/security
+
+# 그 다음 vi로 다시 열기
+sudo vi /opt/security/kisa_unix_check.py
+	> 아래 내용 붙여 넣기
+
+#!/usr/bin/env python3
+"""
+KISA 주요정보통신기반시설 유닉스 취약점 점검 스크립트
+대상: 새싹병원(SaessakHospital) 서버
+항목: U-07 ~ U-71 중 핵심 항목
+실행: sudo python3 kisa_unix_check.py
+크론탭 예시: 0 2 * * * sudo python3 /opt/security/kisa_unix_check.py >> /var/log/kisa_check.log 2>&1
+"""
+
+import os
+import subprocess
+import stat
+import pwd
+import grp
+import json
+import datetime
+import platform
+
+# ── 결과 저장용 ──────────────────────────────────────────
+results = []
+PASS = "✅ 양호"
+FAIL = "❌ 취약"
+INFO = "ℹ️  정보"
+
+def run(cmd):
+    """명령어 실행 후 stdout 반환 (오류 시 빈 문자열)"""
+    try:
+        r = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=10)
+        return r.stdout.strip()
+    except Exception:
+        return ""
+
+def check(code, title, status, detail):
+    results.append({
+        "code": code,
+        "title": title,
+        "status": status,
+        "detail": detail
+    })
+    icon = status.split()[0]
+    print(f"  [{code}] {icon} {title}")
+    if status == FAIL:
+        print(f"        → {detail}")
+
+# ══════════════════════════════════════════════════════════
+# 1. 계정 관리
+# ══════════════════════════════════════════════════════════
+print("\n[1] 계정 관리")
+
+# U-07: 관리자 그룹(wheel/sudo)에 최소한의 계정
+def check_u07():
+    members = []
+    for gname in ["wheel", "sudo", "admin"]:
+        try:
+            g = grp.getgrnam(gname)
+            members.extend(g.gr_mem)
+        except KeyError:
+            pass
+    members = list(set(members))
+    if len(members) <= 2:
+        check("U-07", "관리자 그룹 최소 계정", PASS, f"관리자 그룹 계정: {members}")
+    else:
+        check("U-07", "관리자 그룹 최소 계정", FAIL,
+              f"관리자 그룹에 계정 {len(members)}개 존재: {members} → 최소화 필요")
+
+check_u07()
+
+# U-08: 계정이 존재하지 않는 GID 금지
+def check_u08():
+    bad = []
+    with open("/etc/passwd") as f:
+        for line in f:
+            parts = line.strip().split(":")
+            if len(parts) < 4:
+                continue
+            gid = parts[3]
+            try:
+                grp.getgrgid(int(gid))
+            except KeyError:
+                bad.append(f"{parts[0]}(GID:{gid})")
+    if not bad:
+        check("U-08", "존재하지 않는 GID 금지", PASS, "모든 계정의 GID가 /etc/group에 존재")
+    else:
+        check("U-08", "존재하지 않는 GID 금지", FAIL, f"유효하지 않은 GID 계정: {bad}")
+
+check_u08()
+
+# U-09: 동일한 UID 금지
+def check_u09():
+    uid_map = {}
+    with open("/etc/passwd") as f:
+        for line in f:
+            parts = line.strip().split(":")
+            if len(parts) < 3:
+                continue
+            uid = parts[2]
+            name = parts[0]
+            uid_map.setdefault(uid, []).append(name)
+    dups = {uid: names for uid, names in uid_map.items() if len(names) > 1 and uid != "0"}
+    if not dups:
+        check("U-09", "동일한 UID 금지", PASS, "중복 UID 없음")
+    else:
+        check("U-09", "동일한 UID 금지", FAIL, f"중복 UID 발견: {dups}")
+
+check_u09()
+
+# U-10: 사용자 Shell 점검 (로그인 불필요 계정에 /bin/sh 등 할당 여부)
+def check_u10():
+    valid_shells = set(run("cat /etc/shells").splitlines())
+    system_accounts = []
+    with open("/etc/passwd") as f:
+        for line in f:
+            parts = line.strip().split(":")
+            if len(parts) < 7:
+                continue
+            name, uid, shell = parts[0], int(parts[2]), parts[6]
+            if uid < 1000 and uid != 0 and shell in valid_shells and shell not in ["/sbin/nologin", "/bin/false", "/usr/sbin/nologin"]:
+                system_accounts.append(f"{name}({shell})")
+    if not system_accounts:
+        check("U-10", "사용자 Shell 점검", PASS, "시스템 계정에 불필요한 Shell 없음")
+    else:
+        check("U-10", "사용자 Shell 점검", FAIL,
+              f"로그인 Shell 할당된 시스템 계정: {system_accounts}")
+
+check_u10()
+
+# U-11: 세션 종료 시간 설정 (TMOUT)
+def check_u11():
+    tmout = run("grep -r 'TMOUT' /etc/profile /etc/profile.d/ /etc/bash.bashrc 2>/dev/null")
+    if tmout:
+        # TMOUT 값 추출
+        val = run("grep -r 'TMOUT' /etc/profile /etc/profile.d/ /etc/bash.bashrc 2>/dev/null | grep -oP 'TMOUT=\\K[0-9]+'")
+        if val and int(val.split()[0]) <= 600:
+            check("U-11", "세션 종료 시간 설정", PASS, f"TMOUT={val.split()[0]}초 설정됨")
+        else:
+            check("U-11", "세션 종료 시간 설정", FAIL, f"TMOUT 값이 너무 크거나 미설정: {val}")
+    else:
+        check("U-11", "세션 종료 시간 설정", FAIL, "TMOUT 미설정 → /etc/profile에 'export TMOUT=600' 추가 필요")
+
+check_u11()
+
+# U-12: 패스워드 암호화 알고리즘 (SHA-512 권고)
+def check_u12():
+    algo = run("grep -E '^ENCRYPT_METHOD|^SHA_CRYPT' /etc/login.defs")
+    shadow_sample = run("awk -F: '$2 ~ /^\\$/ {print $2}' /etc/shadow 2>/dev/null | head -1")
+    if "$6$" in (shadow_sample or ""):
+        check("U-12", "패스워드 암호화 알고리즘", PASS, "SHA-512($6$) 사용 중")
+    elif "$5$" in (shadow_sample or ""):
+        check("U-12", "패스워드 암호화 알고리즘", PASS, "SHA-256($5$) 사용 중")
+    elif shadow_sample:
+        check("U-12", "패스워드 암호화 알고리즘", FAIL, f"취약한 암호화 알고리즘 사용: {shadow_sample[:10]}...")
+    else:
+        check("U-12", "패스워드 암호화 알고리즘", INFO, f"shadow 확인 불가 (권한 부족 또는 설정: {algo})")
+
+check_u12()
+
+# ══════════════════════════════════════════════════════════
+# 2. 파일 및 디렉토리 관리
+# ══════════════════════════════════════════════════════════
+print("\n[2] 파일 및 디렉토리 관리")
+
+def check_file_perm(code, title, path, max_perm, expected_owner="root"):
+    """파일 소유자 및 권한 통합 점검"""
+    if not os.path.exists(path):
+        check(code, title, INFO, f"{path} 파일 없음")
+        return
+    s = os.stat(path)
+    perm = oct(s.st_mode)[-3:]
+    owner = pwd.getpwuid(s.st_uid).pw_name
+    issues = []
+    if owner != expected_owner:
+        issues.append(f"소유자={owner}(기대값:{expected_owner})")
+    if int(perm, 8) > int(max_perm, 8):
+        issues.append(f"권한={perm}(최대허용:{max_perm})")
+    if issues:
+        check(code, title, FAIL, f"{path}: {', '.join(issues)}")
+    else:
+        check(code, title, PASS, f"{path}: 소유자={owner}, 권한={perm}")
+
+# U-15: /etc/passwd
+check_file_perm("U-15", "/etc/passwd 소유자 및 권한", "/etc/passwd", "644")
+# U-17: /etc/shadow
+check_file_perm("U-17", "/etc/shadow 소유자 및 권한", "/etc/shadow", "400")
+# U-18: /etc/hosts
+check_file_perm("U-18", "/etc/hosts 소유자 및 권한", "/etc/hosts", "644")
+# U-19: /etc/inetd.conf
+check_file_perm("U-19", "/etc/inetd.conf 소유자 및 권한", "/etc/inetd.conf", "600")
+# U-20: /etc/syslog.conf
+for slog in ["/etc/syslog.conf", "/etc/rsyslog.conf"]:
+    if os.path.exists(slog):
+        check_file_perm("U-20", f"{slog} 소유자 및 권한", slog, "644")
+        break
+# U-21: /etc/services
+check_file_perm("U-21", "/etc/services 소유자 및 권한", "/etc/services", "644")
+
+# U-22: SUID/SGID 파일 점검
+def check_u22():
+    out = run("find / -xdev \\( -perm -4000 -o -perm -2000 \\) -type f 2>/dev/null")
+    files = [f for f in out.splitlines() if f]
+    # 기본 허용 목록
+    allowed = {"/usr/bin/sudo", "/usr/bin/passwd", "/usr/bin/su",
+               "/usr/bin/newgrp", "/usr/bin/chsh", "/usr/bin/chfn",
+               "/bin/ping", "/usr/bin/ping", "/usr/bin/pkexec"}
+    unknown = [f for f in files if f not in allowed]
+    if not unknown:
+        check("U-22", "SUID/SGID 설정 파일 점검", PASS, f"허용된 SUID/SGID 파일만 존재 ({len(files)}개)")
+    else:
+        check("U-22", "SUID/SGID 설정 파일 점검", FAIL,
+              f"비허용 SUID/SGID 파일 {len(unknown)}개: {unknown[:5]}{'...' if len(unknown)>5 else ''}")
+
+check_u22()
+
+# U-24: world writable 파일 점검
+def check_u24():
+    out = run("find / -xdev -type f -perm -0002 2>/dev/null | grep -v '/proc' | grep -v '/sys'")
+    files = [f for f in out.splitlines() if f]
+    if not files:
+        check("U-24", "world writable 파일 점검", PASS, "world writable 파일 없음")
+    else:
+        check("U-24", "world writable 파일 점검", FAIL,
+              f"world writable 파일 {len(files)}개 발견: {files[:3]}{'...' if len(files)>3 else ''}")
+
+check_u24()
+
+# U-29: UMASK 설정 (022 권고)
+def check_u29():
+    umask_val = run("umask")
+    if umask_val in ["0022", "022", "0027", "027"]:
+        check("U-29", "UMASK 설정 관리", PASS, f"UMASK={umask_val}")
+    else:
+        check("U-29", "UMASK 설정 관리", FAIL, f"UMASK={umask_val} (권고: 022 이상)")
+
+check_u29()
+
+# U-30: 홈 디렉토리 소유자 및 권한
+def check_u30():
+    issues = []
+    with open("/etc/passwd") as f:
+        for line in f:
+            parts = line.strip().split(":")
+            if len(parts) < 7:
+                continue
+            name, uid, homedir = parts[0], int(parts[2]), parts[5]
+            if uid < 1000 or not homedir or not os.path.exists(homedir):
+                continue
+            s = os.stat(homedir)
+            owner_uid = s.st_uid
+            perm = oct(s.st_mode)[-3:]
+            if owner_uid != int(parts[2]):
+                issues.append(f"{name}: 홈디렉토리 소유자 불일치")
+            if int(perm, 8) & 0o022:
+                issues.append(f"{name}: 홈디렉토리 권한 {perm} (타인 쓰기 가능)")
+    if not issues:
+        check("U-30", "홈 디렉토리 소유자 및 권한", PASS, "홈 디렉토리 권한 적절")
+    else:
+        check("U-30", "홈 디렉토리 소유자 및 권한", FAIL, "; ".join(issues[:3]))
+
+check_u30()
+
+# ══════════════════════════════════════════════════════════
+# 3. 서비스 관리
+# ══════════════════════════════════════════════════════════
+print("\n[3] 서비스 관리")
+
+def check_service_disabled(code, title, service_names):
+    """서비스 비활성화 여부 점검"""
+    running = []
+    for svc in service_names:
+        status = run(f"systemctl is-active {svc} 2>/dev/null")
+        if status == "active":
+            running.append(svc)
+        # xinetd 방식도 확인
+        inetd = run(f"grep -l '{svc}' /etc/xinetd.d/ 2>/dev/null")
+        if inetd:
+            disabled = run(f"grep 'disable.*yes' /etc/xinetd.d/{svc} 2>/dev/null")
+            if not disabled:
+                running.append(f"{svc}(xinetd)")
+    if not running:
+        check(code, title, PASS, f"{service_names} 서비스 비활성화 확인")
+    else:
+        check(code, title, FAIL, f"활성화된 서비스: {running} → 비활성화 필요")
+
+# U-35: r 계열 서비스 비활성화 (rsh, rlogin, rexec)
+check_service_disabled("U-35", "r계열 서비스 비활성화", ["rsh", "rlogin", "rexec", "rsh.socket"])
+
+# U-36: crontab 파일 권한
+def check_u36():
+    cron_paths = ["/etc/crontab", "/etc/cron.d", "/var/spool/cron"]
+    issues = []
+    for path in cron_paths:
+        if not os.path.exists(path):
+            continue
+        s = os.stat(path)
+        perm = oct(s.st_mode)[-3:]
+        owner = pwd.getpwuid(s.st_uid).pw_name
+        if owner != "root" or int(perm, 8) & 0o022:
+            issues.append(f"{path}: owner={owner}, perm={perm}")
+    if not issues:
+        check("U-36", "crontab 설정파일 권한", PASS, "crontab 파일 권한 적절")
+    else:
+        check("U-36", "crontab 설정파일 권한", FAIL, "; ".join(issues))
+
+check_u36()
+
+# U-37: DoS 취약 서비스 비활성화
+check_service_disabled("U-37", "DoS 취약 서비스 비활성화", ["chargen", "echo", "discard", "daytime", "time"])
+
+# U-43: tftp, talk 비활성화
+check_service_disabled("U-43", "tftp/talk 서비스 비활성화", ["tftp", "tftpd", "talk", "ntalk"])
+
+# U-51: Telnet 비활성화
+check_service_disabled("U-51", "Telnet 서비스 비활성화", ["telnet", "telnetd", "telnet.socket"])
+
+# U-53: 암호화 안된 FTP 비활성화
+def check_u53():
+    ftp_running = run("systemctl is-active vsftpd ftpd proftpd 2>/dev/null | grep active")
+    if not ftp_running:
+        check("U-53", "암호화 안된 FTP 비활성화", PASS, "FTP 서비스 미실행")
+    else:
+        # FTPS/SFTP 설정 확인
+        ssl_conf = run("grep -E 'ssl_enable|tls' /etc/vsftpd.conf 2>/dev/null")
+        if "YES" in ssl_conf.upper():
+            check("U-53", "암호화 안된 FTP 비활성화", PASS, "FTPS(SSL) 설정 확인됨")
+        else:
+            check("U-53", "암호화 안된 FTP 비활성화", FAIL, "FTP 실행 중이나 암호화 미설정")
+
+check_u53()
+
+# U-54: FTP 계정 Shell 제한
+def check_u54():
+    ftpusers = run("cat /etc/ftpusers 2>/dev/null")
+    if "root" in ftpusers:
+        check("U-54", "FTP 계정 Shell 제한", PASS, "root가 ftpusers에 포함됨")
+    else:
+        check("U-54", "FTP 계정 Shell 제한", FAIL if os.path.exists("/etc/ftpusers") else INFO,
+              "/etc/ftpusers에 root 미포함 또는 파일 없음")
+
+check_u54()
+
+# U-57: SNMP 서비스 점검
+def check_u57():
+    snmp = run("systemctl is-active snmpd 2>/dev/null")
+    if snmp != "active":
+        check("U-57", "불필요한 SNMP 서비스 점검", PASS, "SNMP 서비스 미실행")
+    else:
+        community = run("grep -E '^community|^rocommunity|^rwcommunity' /etc/snmp/snmpd.conf 2>/dev/null")
+        if "public" in community or "private" in community:
+            check("U-57", "불필요한 SNMP 서비스 점검", FAIL,
+                  "SNMP 실행 중 + 기본 Community String(public/private) 사용")
+        else:
+            check("U-57", "불필요한 SNMP 서비스 점검", INFO, "SNMP 실행 중, Community String 직접 확인 필요")
+
+check_u57()
+
+# U-59: SNMP Community String 복잡성
+def check_u59():
+    community = run("grep -E 'community' /etc/snmp/snmpd.conf 2>/dev/null")
+    if not community:
+        check("U-59", "SNMP Community String 복잡성", INFO, "SNMP 설정 없음")
+        return
+    if "public" in community or "private" in community:
+        check("U-59", "SNMP Community String 복잡성", FAIL, "기본 Community String 변경 필요")
+    else:
+        check("U-59", "SNMP Community String 복잡성", PASS, "커스텀 Community String 사용 중")
+
+check_u59()
+
+# U-62: sudo 명령어 접근 관리
+def check_u62():
+    sudoers = run("cat /etc/sudoers 2>/dev/null")
+    issues = []
+    if "ALL=(ALL) NOPASSWD: ALL" in sudoers:
+        issues.append("NOPASSWD:ALL 설정 존재 (패스워드 없이 전체 sudo)")
+    if "ALL ALL=(ALL) ALL" in sudoers.replace("\t", " "):
+        issues.append("모든 사용자에게 sudo 전체 허용")
+    if not issues:
+        check("U-62", "sudo 명령어 접근 관리", PASS, "sudo 설정 적절")
+    else:
+        check("U-62", "sudo 명령어 접근 관리", FAIL, "; ".join(issues))
+
+check_u62()
+
+# ══════════════════════════════════════════════════════════
+# 4. 패치 관리
+# ══════════════════════════════════════════════════════════
+print("\n[4] 패치 관리")
+
+# U-63/U-64: 최신 패치 적용 여부
+def check_u64():
+    distro = platform.linux_distribution() if hasattr(platform, 'linux_distribution') else ("", "", "")
+    upgradable = run("apt list --upgradable 2>/dev/null | grep -c upgradable") or \
+                 run("yum check-update 2>/dev/null | grep -c '^[a-zA-Z]'")
+    kernel = run("uname -r")
+    last_update = run("stat -c %y /var/cache/apt/pkgcache.bin 2>/dev/null | cut -d' ' -f1") or \
+                  run("rpm -q --last kernel 2>/dev/null | head -1")
+    if upgradable and int(upgradable) > 50:
+        check("U-64", "최신 패치 적용", FAIL,
+              f"업그레이드 가능한 패키지 {upgradable}개 존재, 커널: {kernel}")
+    else:
+        check("U-64", "최신 패치 적용", PASS,
+              f"커널: {kernel}, 마지막 업데이트: {last_update}")
+
+check_u64()
+
+# ══════════════════════════════════════════════════════════
+# 5. 로그 관리
+# ══════════════════════════════════════════════════════════
+print("\n[5] 로그 관리")
+
+# U-65: 시스템 로깅 설정
+def check_u65():
+    syslog_running = run("systemctl is-active rsyslog syslog 2>/dev/null | grep active")
+    journald = run("systemctl is-active systemd-journald 2>/dev/null")
+    if syslog_running or journald == "active":
+        check("U-65", "정책에 따른 시스템 로깅 설정", PASS,
+              f"로그 데몬 실행 중 (rsyslog:{bool(syslog_running)}, journald:{journald=='active'})")
+    else:
+        check("U-65", "정책에 따른 시스템 로깅 설정", FAIL, "로그 데몬 미실행")
+
+check_u65()
+
+# U-66: 로그 디렉토리 소유자 및 권한
+def check_u66():
+    log_dirs = ["/var/log"]
+    issues = []
+    for path in log_dirs:
+        if not os.path.exists(path):
+            continue
+        s = os.stat(path)
+        perm = oct(s.st_mode)[-3:]
+        owner = pwd.getpwuid(s.st_uid).pw_name
+        if owner != "root":
+            issues.append(f"{path}: 소유자={owner}")
+        if int(perm, 8) & 0o002:
+            issues.append(f"{path}: other 쓰기 가능({perm})")
+    if not issues:
+        check("U-66", "로그 디렉토리 소유자 및 권한", PASS, "/var/log 권한 적절")
+    else:
+        check("U-66", "로그 디렉토리 소유자 및 권한", FAIL, "; ".join(issues))
+
+check_u66()
+
+# ══════════════════════════════════════════════════════════
+# 추가: 병원 서비스 특화 점검
+# ══════════════════════════════════════════════════════════
+print("\n[+] 병원 서비스 특화 점검")
+
+# Apache/웹서버 실행 계정 점검
+def check_web_user():
+    apache_user = run("grep -E '^User|^www-data' /etc/apache2/apache2.conf /etc/httpd/conf/httpd.conf 2>/dev/null | head -1")
+    nginx_user = run("grep '^user' /etc/nginx/nginx.conf 2>/dev/null | head -1")
+    conf = apache_user or nginx_user
+    if "root" in (conf or ""):
+        check("WEB-01", "웹서버 실행 계정", FAIL, "웹서버가 root로 실행 중 → 전용 계정으로 변경 필요")
+    else:
+        check("WEB-01", "웹서버 실행 계정", PASS, f"웹서버 계정: {conf or 'www-data/apache(기본)'}")
+
+check_web_user()
+
+# MySQL/MariaDB root 패스워드 설정 여부
+def check_db_root():
+    result = run("mysql -u root --connect-timeout=3 -e 'SELECT 1' 2>&1")
+    if "Access denied" in result:
+        check("DB-01", "DB root 패스워드 설정", PASS, "MySQL root 패스워드 설정됨")
+    elif "ERROR" not in result and result:
+        check("DB-01", "DB root 패스워드 설정", FAIL, "MySQL root 패스워드 없이 접속 가능!")
+    else:
+        check("DB-01", "DB root 패스워드 설정", INFO, "MySQL 미실행 또는 확인 불가")
+
+check_db_root()
+
+# SSH 설정 점검
+def check_ssh():
+    sshd_conf = "/etc/ssh/sshd_config"
+    if not os.path.exists(sshd_conf):
+        check("SSH-01", "SSH 보안 설정", INFO, "sshd_config 없음")
+        return
+    conf = open(sshd_conf).read()
+    issues = []
+    if "PermitRootLogin yes" in conf:
+        issues.append("root SSH 로그인 허용됨")
+    if "PasswordAuthentication yes" in conf and "PubkeyAuthentication yes" not in conf:
+        issues.append("패스워드 인증만 사용 중 (키 인증 권고)")
+    if "Protocol 1" in conf:
+        issues.append("SSH Protocol 1 사용 중 (취약)")
+    if not issues:
+        check("SSH-01", "SSH 보안 설정", PASS, "SSH 보안 설정 적절")
+    else:
+        check("SSH-01", "SSH 보안 설정", FAIL, "; ".join(issues))
+
+check_ssh()
+
+# ══════════════════════════════════════════════════════════
+# 결과 리포트 출력
+# ══════════════════════════════════════════════════════════
+print("\n" + "="*60)
+print("📊 점검 결과 요약")
+print("="*60)
+
+total = len(results)
+passed = sum(1 for r in results if r["status"] == PASS)
+failed = sum(1 for r in results if r["status"] == FAIL)
+info   = sum(1 for r in results if r["status"] == INFO)
+
+print(f"  총 점검 항목: {total}개")
+print(f"  ✅ 양호: {passed}개")
+print(f"  ❌ 취약: {failed}개")
+print(f"  ℹ️  정보: {info}개")
+print(f"  보안 점수: {int(passed/(total-info)*100) if (total-info) > 0 else 0}점")
+
+if failed > 0:
+    print(f"\n🔴 즉시 조치 필요 항목:")
+    for r in results:
+        if r["status"] == FAIL:
+            print(f"  [{r['code']}] {r['title']}")
+            print(f"    → {r['detail']}")
+
+# JSON 리포트 저장
+report = {
+    "timestamp": datetime.datetime.now().isoformat(),
+    "hostname": run("hostname"),
+    "summary": {"total": total, "passed": passed, "failed": failed, "info": info},
+    "results": results
+}
+report_path = f"/tmp/kisa_check_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+with open(report_path, "w", encoding="utf-8") as f:
+    json.dump(report, f, ensure_ascii=False, indent=2)
+print(f"\n📄 JSON 리포트 저장: {report_path}")
+print("="*60)
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# 3. 권한 설정
+sudo chmod 700 /opt/security/kisa_unix_check.py
+
+# 4. 실행
+sudo python3 /opt/security/kisa_unix_check.py
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# 결과 확인 후 보완 할 코드
+
+### 1번 DB 패스워드 (가장 먼저)
+```bash
+sudo mysql
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '강한패스워드!';
+FLUSH PRIVILEGES;
+EXIT;
+```
+
+### 2번 shadow 권한
+```bash
+sudo chmod 400 /etc/shadow
+```
+
+### 3번 세션 타임아웃
+```bash
+echo "export TMOUT=600" | sudo tee -a /etc/profile
+source /etc/profile
+```
+
+### 4번 FTP 비활성화
+```bash
+sudo systemctl stop vsftpd
+sudo systemctl disable vsftpd
+```
+
+### 5번 U-22 SUID는 지금 안 해도 됨
+Ubuntu 기본 파일들이라 건드리면 오히려 시스템 오류날 수 있어요. 그냥 두세요.
+
+---
+
+다시 스크립트 돌리고 점수 확인
