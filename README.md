@@ -59,6 +59,8 @@
 
 ## 🌐 네트워크 구성
 
+[![가상 새싹병원 네트워크 구축 설계 영상](https://img.youtube.com/vi/hKDisgCVUaQ/maxresdefault.jpg)](https://www.youtube.com/watch?v=hKDisgCVUaQ)
+
 원격 근무자(보안팀), 외부 환자/키오스크, 병원 의료진팀 등 사용자 그룹별로 접근 가능한 서버 범위를 분리 설계했습니다.
 
 [네트워크 구성도]<img width="1117" height="534" alt="스크린샷 2026-06-22 093924" src="https://github.com/user-attachments/assets/a6f6e618-86c8-4e04-bee3-a262d4696aae" />
@@ -74,7 +76,8 @@
 
 계정/회원 관리, 의료자원/원무 관리, 보안관제 영역으로 나뉜 총 11개 테이블로 구성했습니다.
 
-![DB ERD](images/db-erd.jpg)
+[DB ERD]<img width="1230" height="672" alt="스크린샷 2026-06-22 094038" src="https://github.com/user-attachments/assets/85362a7f-bc40-4ecf-9172-4e86c8993636" />
+
 
 <br>
 
