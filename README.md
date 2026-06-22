@@ -95,7 +95,8 @@
 | 네트워크 스캔 탐지 | 대응 없음 | Suricata로 Nmap 등 비인가 스캔 차단 |
 | 비정상 로그인 시도 | 허용 | 10회 이상 시도 시 IP 차단 |
 
-로그인 폼에 SQL Injection을 시도하면 즉시 차단되고, 관제 대시보드에 실시간으로 탐지 로그가 기록됩니다.
+로그인 폼에 SQL Injection을 시도하면 즉시 차단되고, 관제 대시보드에 실시간으로 탐지 로그가 기록됩니다.<img width="1752" height="972" alt="스크린샷 2026-06-22 144345" src="https://github.com/user-attachments/assets/5cc8e1a5-7711-4dc8-b779-414949b5bcb9" />
+
 
 
 <br>
