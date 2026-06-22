@@ -97,23 +97,22 @@
 
 로그인 폼에 SQL Injection을 시도하면 즉시 차단되고, 관제 대시보드에 실시간으로 탐지 로그가 기록됩니다.
 
-![SQLi 탐지 데모](images/sqli-detection-demo.jpg)
 
 <br>
 
 ## 🔍 Red/Blue Team 모의해킹 및 관제 검증
+
+[![7팀 새싹반 시연 영상](https://img.youtube.com/vi/7QbiI7gYo_M/maxresdefault.jpg)](https://www.youtube.com/watch?v=7QbiI7gYo_M)
 
 Kali Linux에서 다양한 공격 시나리오(Nikto 스캔, 대량 트래픽, 디렉토리 스캔, 관리자 페이지 무단 접근, User-Agent 조작, Nmap 정찰, SSH Brute Force 등)를 직접 수행하고, 각 모니터링 도구가 이를 어떻게 탐지하는지 검증했습니다.
 
 ### Graylog — SIEM 기반 실시간 탐지
 Nmap 정찰, SSH Brute Force, 권한 상승 시도 등을 임계치 기반 룰로 탐지합니다.
 
-![Graylog 대시보드](images/graylog-dashboard.jpg)
 
 ### 관제 대시보드 (Grafana 연동)
 Suricata 탐지 로그를 Python 파서가 실시간으로 분류하여 MySQL에 저장하고, 관리자 페이지에서 공격 유형별 분포·위험도·실시간 위험 피드를 한눈에 확인할 수 있습니다.
 
-![관리자 대시보드](images/admin-dashboard.jpg)
 
 ### 그 외 검증 도구
 - **GoAccess** — Nikto 스캔, ab 트래픽, dirb 디렉토리 스캔 등 웹 접근 로그 기반 이상 패턴 시각화
@@ -136,11 +135,11 @@ Python으로 작성한 KISA 유닉스 취약점 점검 스크립트를 크론탭
 
 | 이름 | 주요 수행 내용 |
 |---|---|
-| 임예슬 (팀장) | 백엔드/프론트/DB 시스템 설계, 아키텍처 디자인, 네트워크 구축, PPT 제작 |
-| 정동석 | 프론트 및 시스템 구축, 공격자 PC 테스트 |
-| 강혜진 | 프론트 및 디자인 구축, 공격자 PC 테스트 |
-| 정다혜 | 프론트 및 디자인 구축, 공격자 PC 테스트, 발표 자료 작성 |
-| 박성훈 | 공격자 PC 테스트, 회의자료 작성, PPT 제작, 발표 담당 |
+| (팀장) | 백엔드/프론트/DB 시스템 설계, 아키텍처 디자인, 네트워크 구축, PPT 제작 |
+| DS | 프론트 및 시스템 구축, 공격자 PC 테스트 |
+| HJ | 프론트 및 디자인 구축, 공격자 PC 테스트 |
+| DH | 프론트 및 디자인 구축, 공격자 PC 테스트, 발표 자료 작성 |
+| SH | 공격자 PC 테스트, 회의자료 작성, PPT 제작, 발표 담당 |
 
 <br>
 
