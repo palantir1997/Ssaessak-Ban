@@ -125,7 +125,10 @@ Suricata 탐지 로그를 Python 파서가 실시간으로 분류하여 MySQL에
 
 Python으로 작성한 KISA 유닉스 취약점 점검 스크립트를 크론탭으로 매일 새벽 2시 자동 실행하며, 계정관리·파일/디렉토리 관리·서비스 관리·패치/로그 관리에 병원 서비스 특화 점검 항목(Apache root 실행 여부, MySQL root 패스워드 설정 등)을 추가해 총 31개 항목을 점검합니다.
 
-![1차/2차 점검 결과](images/shell-script-result.jpg)
+[1차/2차 점검 결과]<img width="1619" height="929" alt="스크린샷 2026-06-22 094457" src="https://github.com/user-attachments/assets/ba22ca92-47ce-4448-beb0-5a8da1893a9b" />
+<img width="1230" height="685" alt="스크린샷 2026-06-22 094434" src="https://github.com/user-attachments/assets/8816bdaa-7f6c-4626-922f-bc59d666bc5c" />
+
+
 
 발견된 취약점(불필요한 SUID/SGID, FTP 평문 전송, DB root 계정 보안 미흡)을 즉시 조치한 뒤 재점검하여 **89점 → 100점**으로 개선했습니다.
 
