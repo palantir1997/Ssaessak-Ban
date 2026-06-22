@@ -4,6 +4,8 @@
 
 국내 의료기관을 대상으로 한 랜섬웨어 공격이 매년 증가하고 있지만, 보안 인력과 예산 부족으로 체계적인 대응이 어려운 현실에서 출발한 프로젝트입니다. 병원 웹사이트와 관리자 페이지를 직접 구축하고, 그 위에 IDS/IPS · SIEM 기반의 실시간 침입 탐지 및 시각화 체계를 더해 **공격받았을 때 무엇이 보이는지**를 직접 구현하고 검증했습니다.
 
+[![공격부터 탐지까지 — 새싹병원 보안 인프라 구축](https://img.youtube.com/vi/VvKSCRkPEwg/maxresdefault.jpg)](https://www.youtube.com/watch?v=VvKSCRkPEwg)
+
 <br>
 
 ## 📋 프로젝트 개요
