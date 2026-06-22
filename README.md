@@ -61,7 +61,7 @@
 
 원격 근무자(보안팀), 외부 환자/키오스크, 병원 의료진팀 등 사용자 그룹별로 접근 가능한 서버 범위를 분리 설계했습니다.
 
-![네트워크 구성도](<img width="1117" height="534" alt="스크린샷 2026-06-22 093924" src="https://github.com/user-attachments/assets/a6f6e618-86c8-4e04-bee3-a262d4696aae" />)
+[네트워크 구성도]<img width="1117" height="534" alt="스크린샷 2026-06-22 093924" src="https://github.com/user-attachments/assets/a6f6e618-86c8-4e04-bee3-a262d4696aae" />
 
 **설계 원칙**
 1. 원격 근무자는 SIEM 서버에서만 SSH/ping이 가능하고, 그 외 전체 서버 접속은 허용
