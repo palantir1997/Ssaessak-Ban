@@ -3,7 +3,7 @@ session_start();
 include_once __DIR__ . '/db.php';
 
 // ✅ reCAPTCHA 검증
-$recaptcha_secret   = '6LeTth8tAAAAAGJyFTaIUVZ7WtxnqO2onJPvx5n-';
+$recaptcha_secret   = '보안사항';
 $recaptcha_response = $_POST['g-recaptcha-response'] ?? '';
 if (empty($recaptcha_response)) {
     echo "<script>alert('❌ 로봇 확인을 완료해주세요.'); history.back();</script>";
