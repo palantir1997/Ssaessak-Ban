@@ -156,7 +156,7 @@ if (session_status() === PHP_SESSION_NONE) { session_start(); }
                     </div>
                 </div>
                 <!-- ✅ reCAPTCHA 위젯 -->
-                <div class="g-recaptcha" data-sitekey="6LeTth8tAAAAAC68ZAD1knT4kWbk4LnkCZIl9s9S"></div>
+                <div class="g-recaptcha" data-sitekey="보안사항"></div>
                 <button type="submit" class="w-full bg-sprout-600 hover:bg-sprout-700 text-white font-bold py-3.5 rounded-xl text-sm shadow-md shadow-sprout-100 transition-all">접속 및 인증 가동</button>
                 <div class="text-center text-xs text-gray-400 pt-2">
                     아직 새싹병원 회원이 아니신가요? <button type="button" onclick="toggleAuthModal('signup')" class="text-sprout-600 font-bold underline">즉시 가입</button>
